@@ -7,7 +7,7 @@ export default function PasswordEditDialog({opened, close, passwords, setPasswor
     opened: boolean
     close: () => void
     passwords: Password[]
-    setPasswords: (passwords: Password[]) => void
+    setPasswords: (passwords: Password[]) => Promise<void>
     password?: Password
 }) {
     const [passwordValue, setPasswordValue] = useState(password?.password)
@@ -25,7 +25,7 @@ export default function PasswordEditDialog({opened, close, passwords, setPasswor
         }
         const newPasswords = [...passwords]
         newPasswords[index] = {name, email, phone, password: passwordValue || ""}
-        setPasswords(newPasswords)
+        setPasswords(newPasswords).then(close)
     }
 
     function generateRandomPassword() {

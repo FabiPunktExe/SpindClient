@@ -73,7 +73,7 @@ public class Main {
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
 
         // Start Webview
-        WebviewStandalone webview = new WebviewStandalone(false);
+        WebviewStandalone webview = new WebviewStandalone(true);
         GsonWebviewInterop interop = new GsonWebviewInterop(webview.getWebview());
         interop.bind("spind$getServers", Spind::getServers);
         interop.bind("spind$setServers", Spind::setServers);
