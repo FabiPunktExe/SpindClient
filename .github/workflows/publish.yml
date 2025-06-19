@@ -25,4 +25,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          do gh release upload ${{ github.ref_name }} build/libs/Spind.jar
+          gh release upload ${{ github.ref_name }} build/libs/Spind.jar
