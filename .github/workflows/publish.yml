@@ -1,0 +1,28 @@
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: github-actions
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
+      - name: Upload to GitHub releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          do gh release upload ${{ github.ref_name }} build/libs/Spind.jar
