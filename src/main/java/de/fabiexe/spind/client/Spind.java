@@ -2,6 +2,8 @@ package de.fabiexe.spind.client;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,6 +15,7 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.List;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -230,6 +233,16 @@ public class Spind {
             e.printStackTrace(System.err);
             return e.getMessage();
         }
+    }
+
+    public static Object copyToClipboard(JsonArray params) {
+        try {
+            String text = params.get(0).getAsString();
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace(System.err);
+        }
+        return null;
     }
 
     private record UnlockedSafe(Server server, String passwordHash, String secret, List<Password> passwords) {}

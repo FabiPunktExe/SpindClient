@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "de.fabiexe"
-version = "1.1.0"
+version = "1.1.1"
 
 repositories {
     mavenCentral()
@@ -20,39 +20,34 @@ dependencies {
     implementation("net.notjustanna.webview:webview_java-all-natives:1.5.0+wv0.12.0-nightly.1")
     implementation("net.notjustanna.webview:webview_java-interop:1.5.0+wv0.12.0-nightly.1")
     implementation("com.google.code.gson:gson:2.13.1")
+    implementation("commons-io:commons-io:2.19.0")
 }
 
 sourceSets.main.get().resources.srcDirs(layout.buildDirectory.file("frontend"))
 
 tasks {
-    register<Tar>("buildFrontend") {
+    compileJava {
         doFirst {
             if (OperatingSystem.current() == OperatingSystem.WINDOWS) {
-                ProcessBuilder("cmd.exe", "/c", "npm install && npm run build")
+                ProcessBuilder("cmd.exe", "/c", "npm install && npm run build && tar -cf frontend.tar dist")
                     .inheritIO()
                     .directory(file("frontend"))
                     .start()
                     .waitFor()
             } else {
-                ProcessBuilder("/bin/bash", "-c", "npm install && npm run build")
+                ProcessBuilder("/bin/bash", "-c", "npm install && npm run build && tar -cf frontend.tar dist")
                     .inheritIO()
                     .directory(file("frontend"))
                     .start()
                     .waitFor()
             }
+            copy {
+                from(file("frontend/frontend.tar"))
+                into(layout.buildDirectory.dir("frontend"))
+            }
         }
-        from(file("frontend/dist"))
-        destinationDirectory = layout.buildDirectory.dir("frontend")
-        archiveFileName = "frontend.tar"
-    }
-
-    compileJava {
         options.encoding = "UTF-8"
         options.release = 21
-    }
-
-    processResources {
-        dependsOn("buildFrontend")
     }
 
     jar {

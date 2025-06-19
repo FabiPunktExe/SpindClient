@@ -7,7 +7,7 @@ import PasswordMenu from "../components/PasswordMenu.tsx"
 
 function PasswordDisplay({password}: {password: Password}) {
     async function copyPassword() {
-        await navigator.clipboard.writeText(password.password)
+        await window.spind$copyToClipboard(password.password)
     }
     return <Box className="h-full grow flex flex-col gap-2 items-center justify-center">
         <Typography variant="h5">Credentials for {password.name}</Typography>

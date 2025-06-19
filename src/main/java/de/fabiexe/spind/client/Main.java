@@ -10,24 +10,36 @@ import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.stream.Stream;
 import net.notjustanna.webview.WebviewStandalone;
+import org.apache.commons.io.FileUtils;
 
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
+        // Create temp dir
         Path tempDir = Files.createTempDirectory("spind");
+        Thread shutdownHook = new Thread(() -> {
+            try {
+                FileUtils.deleteDirectory(tempDir.toFile());
+            } catch (IOException e) {
+                e.printStackTrace(System.err);
+            }
+        });
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+
+        // Extract frontend
         OutputStream out = Files.newOutputStream(tempDir.resolve("frontend.tar"), StandardOpenOption.CREATE_NEW);
         InputStream in = Objects.requireNonNull(Main.class.getResourceAsStream("/frontend.tar"));
         in.transferTo(out);
         in.close();
         out.close();
-
         new ProcessBuilder("tar", "-xf", tempDir.resolve("frontend.tar").toString())
                 .directory(tempDir.toFile())
                 .inheritIO()
                 .start()
                 .waitFor();
 
+        // Read HTML, CSS, and JS files
         StringBuilder html = new StringBuilder();
-        try (Stream<Path> paths = Files.walk(tempDir)) {
+        try (Stream<Path> paths = Files.walk(tempDir.resolve("dist"))) {
             paths.filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".html") || path.toString().endsWith(".css"))
                     .forEach(path -> {
@@ -43,7 +55,7 @@ public class Main {
                         }
                     });
         }
-        try (Stream<Path> paths = Files.walk(tempDir)) {
+        try (Stream<Path> paths = Files.walk(tempDir.resolve("dist"))) {
             paths.filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".js"))
                     .forEach(path -> {
@@ -56,6 +68,11 @@ public class Main {
                     });
         }
 
+        // Delete temp dir
+        FileUtils.deleteDirectory(tempDir.toFile());
+        Runtime.getRuntime().removeShutdownHook(shutdownHook);
+
+        // Start Webview
         WebviewStandalone webview = new WebviewStandalone(false);
         GsonWebviewInterop interop = new GsonWebviewInterop(webview.getWebview());
         interop.bind("spind$getServers", Spind::getServers);
@@ -66,6 +83,7 @@ public class Main {
         interop.bind("spind$lock", Spind::lock);
         interop.bind("spind$getPasswords", Spind::getPasswords);
         interop.bind("spind$setPasswords", Spind::setPasswords);
+        interop.bind("spind$copyToClipboard", Spind::copyToClipboard);
         webview.setTitle("Spind");
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         webview.setSize(screenSize.width / 2, screenSize.height / 2);

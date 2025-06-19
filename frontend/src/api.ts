@@ -21,5 +21,6 @@ declare global {
         spind$setup(server: Server, password: string): Promise<true | string>
         spind$getPasswords(server: Server): Promise<Password[]>
         spind$setPasswords(server: Server, passwords: Password[]): Promise<true | string>
+        spind$copyToClipboard(text: string): Promise<void>
     }
 }
