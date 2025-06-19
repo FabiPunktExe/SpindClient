@@ -1,7 +1,5 @@
 package de.fabiexe.spind.client;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
@@ -9,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidKeyException;
@@ -18,8 +17,13 @@ import java.util.*;
 import java.util.List;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Spind {
+    private static final int SAFE_VERSION = 1;
     private static final Path directory;
     private static final Gson gson = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
     private static final List<UnlockedSafe> unlockedSafes = new ArrayList<>();
@@ -102,21 +106,18 @@ public class Spind {
                 return new String(response.body());
             }
 
-            byte[] safe = response.body();
-            byte[] key = new byte[32];
-            System.arraycopy(passwordHash.getBytes(), 0, key, 0, key.length);
-            SecretKey secretKey = new SecretKeySpec(key, "AES");
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            safe = cipher.doFinal(safe);
+            byte[] bytes = response.body();
+            List<Password> passwords = readSafe(passwordHash, bytes);
+            if (passwords == null) {
+                return "Invalid password or corrupted safe";
+            }
 
-            List<Password> passwords = gson.fromJson(new String(safe), new TypeToken<List<Password>>() {}.getType());
             unlockedSafes.add(new UnlockedSafe(server, passwordHash, secret, passwords));
 
             return true;
         } catch (JsonSyntaxException | IndexOutOfBoundsException | NoSuchAlgorithmException | IOException |
                  InterruptedException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
-                 BadPaddingException e) {
+                 BadPaddingException | IllegalArgumentException e) {
             e.printStackTrace(System.err);
             return e.getMessage();
         }
@@ -144,17 +145,11 @@ public class Spind {
             String passwordHash = new String(digest.digest(password.getBytes()));
             String secret = new String(digest.digest(passwordHash.getBytes()));
 
-            byte[] safe = gson.toJson(List.of()).getBytes();
-            byte[] key = new byte[32];
-            System.arraycopy(passwordHash.getBytes(), 0, key, 0, key.length);
-            SecretKey secretKey = new SecretKeySpec(key, "AES");
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            safe = cipher.doFinal(safe);
+            byte[] bytes = writeSafe(passwordHash, List.of());
 
             String authorization = Base64.getEncoder().encodeToString((server.username() + ":" + secret).getBytes());
             HttpRequest request = HttpRequest.newBuilder(URI.create(server.address() + "/v1/passwords"))
-                    .POST(HttpRequest.BodyPublishers.ofByteArray(safe))
+                    .POST(HttpRequest.BodyPublishers.ofByteArray(bytes))
                     .header("Authorization", "Basic " + authorization)
                     .build();
             HttpClient client = HttpClient.newHttpClient();
@@ -204,17 +199,11 @@ public class Spind {
                 return "Safe is not unlocked";
             }
 
-            byte[] safe = gson.toJson(passwords).getBytes();
-            byte[] key = new byte[32];
-            System.arraycopy(unlockedSafe.passwordHash.getBytes(), 0, key, 0, key.length);
-            SecretKey secret = new SecretKeySpec(key, "AES");
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secret);
-            safe = cipher.doFinal(safe);
+            byte[] bytes = writeSafe(unlockedSafe.passwordHash, passwords);
 
             String authorization = Base64.getEncoder().encodeToString((server.username() + ":" + unlockedSafe.secret).getBytes());
             HttpRequest request = HttpRequest.newBuilder(URI.create(server.address() + "/v1/passwords"))
-                    .POST(HttpRequest.BodyPublishers.ofByteArray(safe))
+                    .POST(HttpRequest.BodyPublishers.ofByteArray(bytes))
                     .header("Authorization", "Basic " + authorization)
                     .build();
             HttpClient client = HttpClient.newHttpClient();
@@ -227,6 +216,8 @@ public class Spind {
                 return response.body();
             }
 
+            unlockedSafe.passwords.clear();
+            unlockedSafe.passwords.addAll(passwords);
             return true;
         } catch (JsonSyntaxException | IOException | InterruptedException | NoSuchAlgorithmException |
                  NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
@@ -243,6 +234,54 @@ public class Spind {
             e.printStackTrace(System.err);
         }
         return null;
+    }
+
+    private static byte @NotNull [] writeSafe(@NotNull String passwordHash, @NotNull List<Password> passwords) throws NoSuchPaddingException,
+            NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        ByteBuffer versionBuffer = ByteBuffer.allocate(4);
+        versionBuffer.putInt(SAFE_VERSION);
+        byte[] versionBytes = versionBuffer.array();
+
+        byte[] passwordsBytes = gson.toJson(passwords).getBytes();
+        byte[] key = new byte[32];
+        System.arraycopy(passwordHash.getBytes(), 0, key, 0, key.length);
+        SecretKey secret = new SecretKeySpec(key, "AES");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secret);
+        passwordsBytes = cipher.doFinal(passwordsBytes);
+
+        byte[] bytes = new byte[versionBytes.length + passwordsBytes.length];
+        System.arraycopy(versionBytes, 0, bytes, 0, versionBytes.length);
+        System.arraycopy(passwordsBytes, 0, bytes, versionBytes.length, passwordsBytes.length);
+        return bytes;
+    }
+
+    private static @Nullable List<Password> readSafe(@NotNull String passwordHash, byte @NotNull [] bytes) throws NoSuchPaddingException,
+            NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        if (bytes.length < 4) {
+            throw new IllegalArgumentException("Corrupted data");
+        }
+
+        ByteBuffer versionBuffer = ByteBuffer.wrap(bytes, 0, 4);
+        int version = versionBuffer.getInt();
+        if (version != 1) {
+            if (SAFE_VERSION < version) {
+                throw new IllegalArgumentException("Your Spind version is too old to unlock this safe, please update Spind");
+            } else {
+                throw new IllegalArgumentException("Your Spind version is too new to unlock this safe, please downgrade Spind");
+            }
+        }
+
+        byte[] passwordsBytes = new byte[bytes.length - 4];
+        System.arraycopy(bytes, 4, passwordsBytes, 0, passwordsBytes.length);
+        byte[] key = new byte[32];
+        System.arraycopy(passwordHash.getBytes(), 0, key, 0, key.length);
+        SecretKey secret = new SecretKeySpec(key, "AES");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, secret);
+        passwordsBytes = cipher.doFinal(passwordsBytes);
+
+        return gson.fromJson(new String(passwordsBytes), new TypeToken<List<Password>>() {}.getType());
     }
 
     private record UnlockedSafe(Server server, String passwordHash, String secret, List<Password> passwords) {}
