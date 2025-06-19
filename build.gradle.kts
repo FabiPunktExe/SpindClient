@@ -58,6 +58,13 @@ tasks {
     jar {
         from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        manifest {
+            attributes["Main-Class"] = "de.fabiexe.spind.client.Main"
+            attributes["Implementation-Title"] = "Spind"
+            attributes["Implementation-Version"] = version
+            attributes["Implementation-Vendor"] = "Fabi.exe"
+        }
+        archiveFileName = "Spind.jar"
     }
 
     named<JavaExec>("run") {
@@ -69,5 +76,5 @@ tasks {
 }
 
 application {
-    mainClass = "de.fabiexe.spind.client.Main"
+    mainClass = tasks.jar.get().manifest.attributes["Main-Class"] as String
 }

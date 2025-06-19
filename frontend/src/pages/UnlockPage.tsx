@@ -16,7 +16,6 @@ export default function UnlockPage({server, onSuccess, onSetupRequired, onFail}:
         setLoading(true)
         window.spind$unlock(server, password).then(result => {
             setLoading(false)
-            console.log("Unlock result:", result)
             if (result === true) {
                 onSuccess()
             } else if (result === false) {

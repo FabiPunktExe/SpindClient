@@ -91,12 +91,12 @@ public class Spind {
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
             client.close();
 
-            if (response.statusCode() != 200) {
-                if (response.statusCode() == 412) {
-                    return false;
-                } else {
-                    return new String(response.body());
-                }
+            if (response.statusCode() == 404 || response.statusCode() == 405) {
+                return "The server does not support your Spind version";
+            } else if (response.statusCode() == 412) {
+                return false;
+            } else if (response.statusCode() != 200) {
+                return new String(response.body());
             }
 
             byte[] safe = response.body();
@@ -158,7 +158,9 @@ public class Spind {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             client.close();
 
-            if (response.statusCode() != 200) {
+            if (response.statusCode() == 404 || response.statusCode() == 405) {
+                return "The server does not support your Spind version";
+            } else if (response.statusCode() != 200) {
                 return response.body();
             }
 
@@ -216,7 +218,9 @@ public class Spind {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             client.close();
 
-            if (response.statusCode() != 200) {
+            if (response.statusCode() == 404 || response.statusCode() == 405) {
+                return "The server does not support your Spind version";
+            } else if (response.statusCode() != 200) {
                 return response.body();
             }
 
