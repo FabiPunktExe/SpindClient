@@ -3,10 +3,11 @@ import {useState} from "react"
 import {Button, CircularProgress, Paper, TextField, Typography} from "@mui/material"
 import {LockOpen} from "@mui/icons-material"
 
-export default function UnlockPage({server, onSuccess, onSetupRequired}: {
+export default function UnlockPage({server, onSuccess, onSetupRequired, onFail}: {
     server: Server
     onSuccess: () => void
     onSetupRequired: () => void
+    onFail: (error: string) => void
 }) {
     const [loading, setLoading] = useState(false)
 
@@ -21,7 +22,7 @@ export default function UnlockPage({server, onSuccess, onSetupRequired}: {
             } else if (result === false) {
                 onSetupRequired()
             } else {
-                alert(result)
+                onFail(result)
             }
         })
     }

@@ -23,7 +23,7 @@ function PasswordDisplay({password}: {password: Password}) {
     </Box>
 }
 
-export default function PasswordsPage({server}: {server: Server}) {
+export default function PasswordsPage({server, onError}: {server: Server, onError: (error: string) => void}) {
     const [passwords, setPasswords] = useState<Password[]>([])
     const [selectedTab, setSelectedTab] = useState(0)
     const [passwordAddDialogOpen, setPasswordAddDialogOpen] = useState(false)
@@ -44,7 +44,7 @@ export default function PasswordsPage({server}: {server: Server}) {
                 setPasswords(newPasswords)
                 setSelectedTab(newPasswords.length - 1)
             } else {
-                alert(result)
+                onError(result)
             }
         })
     }
@@ -83,7 +83,7 @@ export default function PasswordsPage({server}: {server: Server}) {
                           if (result === true) {
                               setPasswords(passwords)
                           } else {
-                              alert(result)
+                              onError(result)
                           }
                       }}
                       password={menuPassword}

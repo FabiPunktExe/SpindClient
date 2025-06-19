@@ -3,14 +3,18 @@ import {Button, CircularProgress, Paper, TextField, Typography} from "@mui/mater
 import {Lock} from "@mui/icons-material"
 import {useState} from "react"
 
-export default function SetupPage({server, onSuccess, onFail}: {server: Server, onSuccess: () => void, onFail?: () => void}) {
+export default function SetupPage({server, onSuccess, onFail}: {
+    server: Server
+    onSuccess: () => void
+    onFail: (error: string) => void
+}) {
     const [loading, setLoading] = useState(false)
 
     function submit(data: FormData) {
         const password = data.get("password") as string
         const repeatPassword = data.get("repeat-password") as string
         if (password !== repeatPassword) {
-            alert("Passwords do not match")
+            onFail("Passwords do not match")
             return
         }
 
@@ -20,10 +24,7 @@ export default function SetupPage({server, onSuccess, onFail}: {server: Server, 
             if (result === true) {
                 onSuccess()
             } else {
-                alert(result)
-                if (onFail) {
-                    onFail()
-                }
+                onFail(result)
             }
         })
     }
