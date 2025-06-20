@@ -41,6 +41,7 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
         const newPasswords = [...passwords, password]
         window.spind$setPasswords(server, newPasswords).then(result => {
             if (result === true) {
+                newPasswords.sort((a, b) => a.name.localeCompare(b.name))
                 setPasswords(newPasswords)
                 setSelectedTab(newPasswords.length - 1)
             } else {

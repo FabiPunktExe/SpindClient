@@ -23,6 +23,7 @@ export default function App() {
     async function addServer(server: Server) {
         const newServers = [...servers, server]
         await window.spind$setServers(newServers)
+        newServers.sort((a, b) => a.name.localeCompare(b.name))
         setServers(newServers)
         setSelectedTab(newServers.length - 1)
     }
