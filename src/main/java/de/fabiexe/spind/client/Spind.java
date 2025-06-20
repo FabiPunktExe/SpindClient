@@ -32,6 +32,10 @@ public class Spind {
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
             directory = Path.of(System.getenv("APPDATA"), "Spind");
+        } else if (os.contains("nix") || os.contains("nux")) {
+            directory = Path.of(System.getProperty("user.home"), ".spind");
+        } else if (os.contains("mac")) {
+            directory = Path.of(System.getProperty("user.home"), "Library", "Application Support", "Spind");
         } else {
             throw new UnsupportedOperationException("Unsupported operating system: " + os);
         }
