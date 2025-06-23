@@ -1,4 +1,4 @@
-import {useEffect, useState, MouseEvent} from "react"
+import {useEffect, useState, MouseEvent, ChangeEvent} from "react"
 import {Password, Server} from "../api.ts"
 import {Box, Button, Paper, Tab, Tabs, TextField, Typography} from "@mui/material"
 import {Add, ContentCopy} from "@mui/icons-material"
@@ -25,6 +25,7 @@ function PasswordDisplay({password}: {password: Password}) {
 
 export default function PasswordsPage({server, onError}: {server: Server, onError: (error: string) => void}) {
     const [passwords, setPasswords] = useState<Password[]>([])
+    const [searchQuery, setSearchQuery] = useState("")
     const [selectedTab, setSelectedTab] = useState(0)
     const [passwordAddDialogOpen, setPasswordAddDialogOpen] = useState(false)
     const [menuPassword, setMenuPassword] = useState<Password | undefined>(undefined)
@@ -39,27 +40,38 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
 
     async function addPassword(password: Password) {
         const newPasswords = [...passwords, password]
-        window.spind$setPasswords(server, newPasswords).then(result => {
-            if (result === true) {
-                newPasswords.sort((a, b) => a.name.localeCompare(b.name))
-                setPasswords(newPasswords)
-                setSelectedTab(newPasswords.length - 1)
-            } else {
-                onError(result)
-            }
-        })
+        const result = await window.spind$setPasswords(server, newPasswords)
+        if (result === true) {
+            newPasswords.sort((a, b) => a.name.localeCompare(b.name))
+            setPasswords(newPasswords)
+            setSelectedTab(newPasswords.length - 1)
+        } else {
+            onError(result)
+        }
     }
+
+    function changePasswordFilter(event: ChangeEvent<HTMLInputElement>) {
+        setSearchQuery(event.target.value)
+    }
+
+    const filteredPasswords = passwords.filter(password => {
+        return password.name.toLowerCase().includes(searchQuery.toLowerCase())
+    })
 
     return <Paper className="h-full grow p-2 flex flex-row gap-2">
         <Box className="flex flex-col gap-2">
             <Button variant="contained"
                     startIcon={<Add/>}
                     onClick={() => setPasswordAddDialogOpen(true)}>Add Password</Button>
+            <TextField size="small"
+                       placeholder="Search"
+                       value={searchQuery}
+                       onChange={changePasswordFilter}/>
             <Tabs value={selectedTab}
                   onChange={(_, tab) => setSelectedTab(parseInt(tab))}
                   orientation="vertical"
                   variant="scrollable">
-                {passwords.map((password, key) => {
+                {filteredPasswords.map((password, key) => {
                     function onContextMenu(event: MouseEvent<HTMLDivElement>) {
                         setMenuPassword(password)
                         setMenuAnchor(event.currentTarget)
@@ -67,8 +79,11 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
                     return <Tab key={key} value={key} label={password.name} onContextMenu={onContextMenu}/>
                 })}
             </Tabs>
+            {filteredPasswords.length == 0 && <Typography color="text.secondary" align="center">
+                No passwords match your search
+            </Typography>}
         </Box>
-        {passwords.map((password, key) => {
+        {filteredPasswords.map((password, key) => {
             if (key == selectedTab) {
                 return <PasswordDisplay key={key} password={password}/>
             } else {
