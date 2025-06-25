@@ -10,3 +10,4 @@ rootProject.name = "client"
 
 include("common")
 include("desktop")
+include("android")

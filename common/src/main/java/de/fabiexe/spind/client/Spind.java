@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Spind {
     private static final int SAFE_VERSION = 1;
-    private static final Path directory;
+    static Path directory;
     private static final Gson gson = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
     private static final List<UnlockedSafe> unlockedSafes = new ArrayList<>();
 
@@ -36,14 +36,15 @@ public class Spind {
             directory = Path.of(System.getProperty("user.home"), ".spind");
         } else if (os.contains("mac")) {
             directory = Path.of(System.getProperty("user.home"), "Library", "Application Support", "Spind");
-        } else {
-            throw new UnsupportedOperationException("Unsupported operating system: " + os);
         }
     }
 
     public static @NotNull List<Server> getServers() {
+        if (!Files.exists(directory.resolve("servers.json"))) {
+            return List.of();
+        }
         try {
-            String json = Files.readString(directory.resolve("servers.json"));
+            String json = new String(Files.readAllBytes(directory.resolve("servers.json")));
             return gson.fromJson(json, new TypeToken<>() {});
         } catch (IOException | JsonSyntaxException e) {
             e.printStackTrace(System.err);
@@ -54,7 +55,7 @@ public class Spind {
     public static boolean setServers(@NotNull List<Server> servers) {
         try {
             Files.createDirectories(directory);
-            Files.writeString(directory.resolve("servers.json"), gson.toJson(servers));
+            Files.write(directory.resolve("servers.json"), gson.toJson(servers).getBytes());
             return true;
         } catch (IOException e) {
             e.printStackTrace(System.err);
@@ -81,8 +82,8 @@ public class Spind {
             String passwordHash = new String(digest.digest(password.getBytes()));
             String secret = new String(digest.digest(passwordHash.getBytes()));
 
-            String authorization = Base64.getEncoder().encodeToString((server.username() + ":" + secret).getBytes());
-            HttpRequest request = HttpRequest.newBuilder(URI.create(server.address() + "/v1/passwords"))
+            String authorization = Base64.getEncoder().encodeToString((server.getUsername() + ":" + secret).getBytes());
+            HttpRequest request = HttpRequest.newBuilder(URI.create(server.getAddress() + "/v1/passwords"))
                     .GET()
                     .header("Authorization", "Basic " + authorization)
                     .build();
@@ -127,8 +128,8 @@ public class Spind {
 
             byte[] bytes = writeSafe(passwordHash, List.of());
 
-            String authorization = Base64.getEncoder().encodeToString((server.username() + ":" + secret).getBytes());
-            HttpRequest request = HttpRequest.newBuilder(URI.create(server.address() + "/v1/passwords"))
+            String authorization = Base64.getEncoder().encodeToString((server.getUsername() + ":" + secret).getBytes());
+            HttpRequest request = HttpRequest.newBuilder(URI.create(server.getAddress() + "/v1/passwords"))
                     .POST(HttpRequest.BodyPublishers.ofByteArray(bytes))
                     .header("Authorization", "Basic " + authorization)
                     .build();
@@ -171,8 +172,8 @@ public class Spind {
 
             byte[] bytes = writeSafe(unlockedSafe.passwordHash, passwords);
 
-            String authorization = Base64.getEncoder().encodeToString((server.username() + ":" + unlockedSafe.secret).getBytes());
-            HttpRequest request = HttpRequest.newBuilder(URI.create(server.address() + "/v1/passwords"))
+            String authorization = Base64.getEncoder().encodeToString((server.getUsername() + ":" + unlockedSafe.secret).getBytes());
+            HttpRequest request = HttpRequest.newBuilder(URI.create(server.getAddress() + "/v1/passwords"))
                     .POST(HttpRequest.BodyPublishers.ofByteArray(bytes))
                     .header("Authorization", "Basic " + authorization)
                     .build();
@@ -248,5 +249,58 @@ public class Spind {
         return gson.fromJson(new String(passwordsBytes), new TypeToken<List<Password>>() {}.getType());
     }
 
-    private record UnlockedSafe(Server server, String passwordHash, String secret, List<Password> passwords) {}
+    private static class UnlockedSafe {
+        final Server server;
+        final String passwordHash;
+        final String secret;
+        final List<Password> passwords;
+
+        UnlockedSafe(Server server, String passwordHash, String secret, List<Password> passwords) {
+            this.server = server;
+            this.passwordHash = passwordHash;
+            this.secret = secret;
+            this.passwords = passwords;
+        }
+
+        public Server server() {
+            return server;
+        }
+
+        public String passwordHash() {
+            return passwordHash;
+        }
+
+        public String secret() {
+            return secret;
+        }
+
+        public List<Password> passwords() {
+            return passwords;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            UnlockedSafe that = (UnlockedSafe) o;
+            return server.equals(that.server) && 
+                   passwordHash.equals(that.passwordHash) && 
+                   secret.equals(that.secret) && 
+                   passwords.equals(that.passwords);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(server, passwordHash, secret, passwords);
+        }
+
+        @Override
+        public String toString() {
+            return "UnlockedSafe[" +
+                   "server=" + server + ", " +
+                   "passwordHash=" + passwordHash + ", " +
+                   "secret=" + secret + ", " +
+                   "passwords=" + passwords + ']';
+        }
+    }
 }

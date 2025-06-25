@@ -3,6 +3,11 @@ import {createRoot} from "react-dom/client"
 import "./index.css"
 import App from "./App.tsx"
 import {createTheme, ThemeProvider} from "@mui/material"
+import {registerAndroidApi} from "./api-android.ts"
+
+if (/android/i.test(navigator.userAgent)) {
+    registerAndroidApi()
+}
 
 window.addEventListener("contextmenu", event => {
     event.preventDefault()
