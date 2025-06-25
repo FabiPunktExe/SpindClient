@@ -41,7 +41,7 @@ public class Spind {
         }
     }
 
-    public static List<Server> getServers(JsonArray params) {
+    public static @NotNull List<Server> getServers() {
         try {
             String json = Files.readString(directory.resolve("servers.json"));
             return gson.fromJson(json, new TypeToken<>() {});
@@ -51,42 +51,30 @@ public class Spind {
         }
     }
 
-    public static Object setServers(JsonArray params) {
+    public static boolean setServers(@NotNull List<Server> servers) {
         try {
-            List<Server> servers = gson.fromJson(params.get(0), new TypeToken<>() {});
             Files.createDirectories(directory);
             Files.writeString(directory.resolve("servers.json"), gson.toJson(servers));
-        } catch (JsonSyntaxException | IOException e) {
+            return true;
+        } catch (IOException e) {
             e.printStackTrace(System.err);
+            return false;
         }
-        return null;
     }
 
-    public static boolean isLocked(JsonArray params) {
-        try {
-            Server server = gson.fromJson(params.get(0), Server.class);
-            for (UnlockedSafe safe : unlockedSafes) {
-                if (safe.server.equals(server)) {
-                    return false;
-                }
+    public static boolean isLocked(@NotNull Server server) {
+        for (UnlockedSafe safe : unlockedSafes) {
+            if (safe.server.equals(server)) {
+                return false;
             }
-        } catch (JsonSyntaxException e) {
-            e.printStackTrace(System.err);
         }
         return true;
     }
 
-    public static Object unlock(JsonArray params) {
+    public static boolean unlock(@NotNull Server server, @NotNull String password) {
         try {
-            Server server = gson.fromJson(params.get(0), Server.class);
-            for (UnlockedSafe safe : unlockedSafes) {
-                if (safe.server.equals(server)) {
-                    return true; // Already unlocked
-                }
-            }
-            String password = gson.fromJson(params.get(1), String.class);
-            if (password == null || password.isEmpty()) {
-                return false;
+            if (!isLocked(server)) {
+                return true;
             }
 
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -103,17 +91,17 @@ public class Spind {
             client.close();
 
             if (response.statusCode() == 404 || response.statusCode() == 405) {
-                return "The server does not support your Spind version";
+                throw new RuntimeException("The server does not support your Spind version");
             } else if (response.statusCode() == 412) {
                 return false;
             } else if (response.statusCode() != 200) {
-                return new String(response.body());
+                throw new RuntimeException(new String(response.body()));
             }
 
             byte[] bytes = response.body();
             List<Password> passwords = readSafe(passwordHash, bytes);
             if (passwords == null) {
-                return "Invalid password or corrupted safe";
+                throw new RuntimeException("Invalid password or corrupted safe");
             }
 
             unlockedSafes.add(new UnlockedSafe(server, passwordHash, secret, passwords));
@@ -123,28 +111,16 @@ public class Spind {
                  InterruptedException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
                  BadPaddingException | IllegalArgumentException e) {
             e.printStackTrace(System.err);
-            return e.getMessage();
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-    public static Object lock(JsonArray params) {
-        try {
-            Server server = gson.fromJson(params.get(0), Server.class);
-            unlockedSafes.removeIf(safe -> safe.server.equals(server));
-        } catch (JsonSyntaxException e) {
-            e.printStackTrace(System.err);
-        }
-        return null;
+    public static void lock(@NotNull Server server) {
+        unlockedSafes.removeIf(safe -> safe.server.equals(server));
     }
 
-    public static Object setup(JsonArray params) {
+    public static void setup(@NotNull Server server, @NotNull String password) {
         try {
-            Server server = gson.fromJson(params.get(0), Server.class);
-            String password = gson.fromJson(params.get(1), String.class);
-            if (server == null || password == null || password.isEmpty()) {
-                return "Invalid parameters";
-            }
-
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             String passwordHash = new String(digest.digest(password.getBytes()));
             String secret = new String(digest.digest(passwordHash.getBytes()));
@@ -161,38 +137,28 @@ public class Spind {
             client.close();
 
             if (response.statusCode() == 404 || response.statusCode() == 405) {
-                return "The server does not support your Spind version";
+                throw new RuntimeException("The server does not support your Spind version");
             } else if (response.statusCode() != 200) {
-                return response.body();
+                throw new RuntimeException(response.body());
             }
-
-            return true;
         } catch (JsonSyntaxException | NoSuchAlgorithmException | IOException | InterruptedException |
                  NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace(System.err);
-            return e.getMessage();
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-    public static List<Password> getPasswords(JsonArray params) {
-        try {
-            Server server = gson.fromJson(params.get(0), Server.class);
-            for (UnlockedSafe safe : unlockedSafes) {
-                if (safe.server.equals(server)) {
-                    return safe.passwords;
-                }
+    public static @NotNull List<Password> getPasswords(@NotNull Server server) {
+        for (UnlockedSafe safe : unlockedSafes) {
+            if (safe.server.equals(server)) {
+                return safe.passwords;
             }
-        } catch (JsonSyntaxException e) {
-            e.printStackTrace(System.err);
         }
         return List.of();
     }
 
-    public static Object setPasswords(JsonArray params) {
+    public static boolean setPasswords(@NotNull Server server, @NotNull List<Password> passwords) {
         try {
-            Server server = gson.fromJson(params.get(0), Server.class);
-            List<Password> passwords = gson.fromJson(params.get(1), new TypeToken<List<Password>>() {}.getType());
-
             UnlockedSafe unlockedSafe = null;
             for (UnlockedSafe unlockedSafe2 : unlockedSafes) {
                 if (unlockedSafe2.server.equals(server)) {
@@ -200,7 +166,7 @@ public class Spind {
                 }
             }
             if (unlockedSafe == null) {
-                return "Safe is not unlocked";
+                throw new RuntimeException("Safe is not unlocked");
             }
 
             byte[] bytes = writeSafe(unlockedSafe.passwordHash, passwords);
@@ -215,9 +181,9 @@ public class Spind {
             client.close();
 
             if (response.statusCode() == 404 || response.statusCode() == 405) {
-                return "The server does not support your Spind version";
+                throw new RuntimeException("The server does not support your Spind version");
             } else if (response.statusCode() != 200) {
-                return response.body();
+                throw new RuntimeException(response.body());
             }
 
             unlockedSafe.passwords.clear();
@@ -226,18 +192,12 @@ public class Spind {
         } catch (JsonSyntaxException | IOException | InterruptedException | NoSuchAlgorithmException |
                  NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace(System.err);
-            return e.getMessage();
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-    public static Object copyToClipboard(JsonArray params) {
-        try {
-            String text = params.get(0).getAsString();
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
-        } catch (JsonSyntaxException e) {
-            e.printStackTrace(System.err);
-        }
-        return null;
+    public static void copyToClipboard(@NotNull String text) {
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
     }
 
     private static byte @NotNull [] writeSafe(@NotNull String passwordHash, @NotNull List<Password> passwords) throws NoSuchPaddingException,

@@ -75,15 +75,15 @@ public class Main {
         // Start Webview
         WebviewStandalone webview = new WebviewStandalone(true);
         GsonWebviewInterop interop = new GsonWebviewInterop(webview.getWebview());
-        interop.bind("spind$getServers", Spind::getServers);
-        interop.bind("spind$setServers", Spind::setServers);
-        interop.bind("spind$isLocked", Spind::isLocked);
-        interop.bind("spind$setup", Spind::setup);
-        interop.bind("spind$unlock", Spind::unlock);
-        interop.bind("spind$lock", Spind::lock);
-        interop.bind("spind$getPasswords", Spind::getPasswords);
-        interop.bind("spind$setPasswords", Spind::setPasswords);
-        interop.bind("spind$copyToClipboard", Spind::copyToClipboard);
+        interop.bind("spind$getServers", SpindJsApi::getServers);
+        interop.bind("spind$setServers", SpindJsApi::setServers);
+        interop.bind("spind$isLocked", SpindJsApi::isLocked);
+        interop.bind("spind$setup", SpindJsApi::setup);
+        interop.bind("spind$unlock", SpindJsApi::unlock);
+        interop.bind("spind$lock", SpindJsApi::lock);
+        interop.bind("spind$getPasswords", SpindJsApi::getPasswords);
+        interop.bind("spind$setPasswords", SpindJsApi::setPasswords);
+        interop.bind("spind$copyToClipboard", SpindJsApi::copyToClipboard);
         webview.setTitle("Spind");
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         webview.setSize(screenSize.width / 2, screenSize.height / 2);
