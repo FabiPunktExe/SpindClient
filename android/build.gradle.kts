@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = group as String
+    namespace = "de.fabiexe.spind.client"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = group as String
+        applicationId = "de.fabiexe.spind.client"
         minSdk = 32
         targetSdk = 36
         versionCode = version.toString().replace("[^0-9]".toRegex(), "").toIntOrNull() ?: 0
