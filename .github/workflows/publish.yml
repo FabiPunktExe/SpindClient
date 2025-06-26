@@ -20,11 +20,53 @@ jobs:
       - name: Build
         run: |
           chmod +x ./gradlew
-          ./gradlew build
+          ./gradlew desktop:build
+      - name: Upload to GitHub releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload ${{ github.ref_name }} desktop/build/libs/SpindDesktop.jar
+  publish-windows:
+    runs-on: windows-latest
+    environment: github-actions
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install Wix Toolset
+        run: choco install wixtoolset
+      - name: Build
+        run: |
+          chmod +x ./gradlew
+          .\gradlew desktop:build
+          .\gradlew jpackage
       - name: Upload to GitHub releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload ${{ github.ref_name }} desktop/build/libs/SpindDesktop.jar
+          mv desktop/build/Spind-*.msi desktop/build/SpindInstaller.msi
+          gh release upload ${{ github.ref_name }} desktop/build/SpindInstaller.msi
+  publish-android:
+    runs-on: ubuntu-latest
+    environment: github-actions
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew android:build
+      - name: Upload to GitHub releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           mv android/build/output/apk/release/android-release-unsigned.apk android/build/output/apk/release/SpindAndroid.apk
-          gh release upload ${{ github.ref_name }} android/build/libs/SpindDesktop.jar
+          gh release upload ${{ github.ref_name }} android/build/libs/SpindAndroid.jar
