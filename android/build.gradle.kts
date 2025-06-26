@@ -3,24 +3,21 @@ plugins {
 }
 
 android {
-    namespace = "de.fabiexe.spind.client"
+    namespace = group as String
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "de.fabiexe.spind.client"
+        applicationId = group as String
         minSdk = 32
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = version.toString().replace("[^0-9]".toRegex(), "").toIntOrNull() ?: 0
+        versionName = version as String
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 

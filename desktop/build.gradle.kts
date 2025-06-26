@@ -35,7 +35,7 @@ tasks {
             attributes["Implementation-Version"] = version
             attributes["Implementation-Vendor"] = "Fabi.exe"
         }
-        archiveFileName = "Spind.jar"
+        archiveFileName = "SpindDesktop.jar"
     }
 
     named<JavaExec>("run") {
