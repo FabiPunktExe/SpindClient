@@ -2,8 +2,6 @@ package de.fabiexe.spind.client;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -172,7 +170,7 @@ public class Spind {
 
             String authorization = Base64.getEncoder().encodeToString((server.getUsername() + ":" + unlockedSafe.secret).getBytes());
             Request request = new Request.Builder()
-                    .put(RequestBody.create(bytes))
+                    .post(RequestBody.create(bytes))
                     .url(server.getAddress() + "/v1/passwords")
                     .header("Authorization", "Basic " + authorization)
                     .build();
