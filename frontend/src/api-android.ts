@@ -11,7 +11,7 @@ declare global {
             setup(server: string, password: string): string
             getPasswords(server: string): string
             setPasswords(server: string, passwords: string): string
-            copyToClipboard(text: string): void
+            copyToClipboard(label: string, text: string): void
         }
     }
 }
@@ -41,7 +41,7 @@ export function registerAndroidApi() {
     window.spind$setPasswords = async (server: Server, passwords: Password[]) => {
         return JSON.parse(window.spind.setPasswords(JSON.stringify(server), JSON.stringify(passwords)))
     }
-    window.spind$copyToClipboard = async (text: string) => {
-        window.spind.copyToClipboard(text)
+    window.spind$copyToClipboard = async (label: string, text: string) => {
+        window.spind.copyToClipboard(label, text)
     }
 }

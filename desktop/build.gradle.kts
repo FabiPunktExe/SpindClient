@@ -15,6 +15,7 @@ dependencies {
     implementation("net.notjustanna.webview:webview_java:1.5.0+wv0.12.0-nightly.1")
     implementation("net.notjustanna.webview:webview_java-all-natives:1.5.0+wv0.12.0-nightly.1")
     implementation("net.notjustanna.webview:webview_java-interop:1.5.0+wv0.12.0-nightly.1")
+    runtimeOnly("com.squareup.okhttp3:okhttp:4.12.0")
 }
 
 sourceSets.main.get().resources.srcDirs(layout.buildDirectory.file("frontend"))

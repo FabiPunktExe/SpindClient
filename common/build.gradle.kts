@@ -8,6 +8,7 @@ repositories {
 
 dependencies {
     compileOnly("org.jetbrains:annotations:26.0.2")
+    compileOnly("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.13.1")
     implementation("commons-io:commons-io:2.19.0")
 }

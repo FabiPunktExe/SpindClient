@@ -1,6 +1,7 @@
 package de.fabiexe.spind.client;
 
 import android.annotation.SuppressLint;
+import android.content.ClipboardManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
@@ -64,7 +65,7 @@ public class Main extends ComponentActivity {
             webView.getSettings().setAllowFileAccess(true);
             webView.setWebChromeClient(new SpindChromeClient());
             webView.setWebViewClient(new SpindWebViewClient());
-            webView.addJavascriptInterface(new SpindJsApi(), "spind");
+            webView.addJavascriptInterface(new SpindJsApi(getSystemService(ClipboardManager.class)), "spind");
             //webView.loadData("<html><head><script type=\"module\">console.log('test');console.log(spind.test(['test']));</script></head><body onclick='console.log(\"test\")'>'%23' is the percent code for ‘#‘ </body></html>", null, null);
             //webView.loadData(new String(Files.readAllBytes(tempDir.resolve("dist/index.html")), StandardCharsets.UTF_8), null, null);
             webView.loadUrl(tempDir.resolve("dist/index.html").toString());

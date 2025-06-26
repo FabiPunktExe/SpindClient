@@ -15,7 +15,6 @@ export default function App() {
 
     useEffect(() => {
         window.spind$getServers().then(servers => {
-            console.log("Loaded servers:", typeof servers, Object.keys(servers), servers)
             servers.sort((a, b) => a.name.localeCompare(b.name))
             setServers(servers)
         })

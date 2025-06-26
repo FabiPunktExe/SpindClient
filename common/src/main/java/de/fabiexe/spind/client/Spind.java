@@ -1,12 +1,10 @@
 package de.fabiexe.spind.client;
 
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,10 +15,12 @@ import java.util.*;
 import java.util.List;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class Spind {
     private static final int SAFE_VERSION = 1;
@@ -83,34 +83,32 @@ public class Spind {
             String secret = new String(digest.digest(passwordHash.getBytes()));
 
             String authorization = Base64.getEncoder().encodeToString((server.getUsername() + ":" + secret).getBytes());
-            HttpRequest request = HttpRequest.newBuilder(URI.create(server.getAddress() + "/v1/passwords"))
-                    .GET()
+            Request request = new Request.Builder()
+                    .get()
+                    .url(server.getAddress() + "/v1/passwords")
                     .header("Authorization", "Basic " + authorization)
                     .build();
-            HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            client.close();
-
-            if (response.statusCode() == 404 || response.statusCode() == 405) {
-                throw new RuntimeException("The server does not support your Spind version");
-            } else if (response.statusCode() == 412) {
-                return false;
-            } else if (response.statusCode() != 200) {
-                throw new RuntimeException(new String(response.body()));
+            OkHttpClient client = new OkHttpClient();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.code() == 404 || response.code() == 405) {
+                    throw new RuntimeException("The server does not support your Spind version");
+                } else if (response.code() == 412) {
+                    return false;
+                } else if (response.code() != 200) {
+                    throw new RuntimeException(response.body().string());
+                } else {
+                    List<Password> passwords = readSafe(passwordHash, response.body().bytes());
+                    if (passwords == null) {
+                        throw new RuntimeException("Invalid password or corrupted safe");
+                    }
+                    unlockedSafes.add(new UnlockedSafe(server, passwordHash, secret, passwords));
+                }
             }
-
-            byte[] bytes = response.body();
-            List<Password> passwords = readSafe(passwordHash, bytes);
-            if (passwords == null) {
-                throw new RuntimeException("Invalid password or corrupted safe");
-            }
-
-            unlockedSafes.add(new UnlockedSafe(server, passwordHash, secret, passwords));
 
             return true;
-        } catch (JsonSyntaxException | IndexOutOfBoundsException | NoSuchAlgorithmException | IOException |
-                 InterruptedException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
-                 BadPaddingException | IllegalArgumentException e) {
+        } catch (JsonSyntaxException | IndexOutOfBoundsException | NoSuchAlgorithmException |
+                 IOException | NoSuchPaddingException | InvalidKeyException |
+                 IllegalBlockSizeException | BadPaddingException | IllegalArgumentException e) {
             e.printStackTrace(System.err);
             throw new RuntimeException(e.getMessage());
         }
@@ -129,21 +127,21 @@ public class Spind {
             byte[] bytes = writeSafe(passwordHash, List.of());
 
             String authorization = Base64.getEncoder().encodeToString((server.getUsername() + ":" + secret).getBytes());
-            HttpRequest request = HttpRequest.newBuilder(URI.create(server.getAddress() + "/v1/passwords"))
-                    .POST(HttpRequest.BodyPublishers.ofByteArray(bytes))
+            Request request = new Request.Builder()
+                    .post(RequestBody.create(bytes))
+                    .url(server.getAddress() + "/v1/passwords")
                     .header("Authorization", "Basic " + authorization)
                     .build();
-            HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            client.close();
-
-            if (response.statusCode() == 404 || response.statusCode() == 405) {
-                throw new RuntimeException("The server does not support your Spind version");
-            } else if (response.statusCode() != 200) {
-                throw new RuntimeException(response.body());
+            OkHttpClient client = new OkHttpClient();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.code() == 404 || response.code() == 405) {
+                    throw new RuntimeException("The server does not support your Spind version");
+                } else if (response.code() != 200) {
+                    throw new RuntimeException(response.body().string());
+                }
             }
-        } catch (JsonSyntaxException | NoSuchAlgorithmException | IOException | InterruptedException |
-                 NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+        } catch (JsonSyntaxException | NoSuchAlgorithmException | IOException | NoSuchPaddingException |
+                 InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace(System.err);
             throw new RuntimeException(e.getMessage());
         }
@@ -173,32 +171,27 @@ public class Spind {
             byte[] bytes = writeSafe(unlockedSafe.passwordHash, passwords);
 
             String authorization = Base64.getEncoder().encodeToString((server.getUsername() + ":" + unlockedSafe.secret).getBytes());
-            HttpRequest request = HttpRequest.newBuilder(URI.create(server.getAddress() + "/v1/passwords"))
-                    .POST(HttpRequest.BodyPublishers.ofByteArray(bytes))
+            Request request = new Request.Builder()
+                    .put(RequestBody.create(bytes))
+                    .url(server.getAddress() + "/v1/passwords")
                     .header("Authorization", "Basic " + authorization)
                     .build();
-            HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            client.close();
-
-            if (response.statusCode() == 404 || response.statusCode() == 405) {
-                throw new RuntimeException("The server does not support your Spind version");
-            } else if (response.statusCode() != 200) {
-                throw new RuntimeException(response.body());
+            OkHttpClient client = new OkHttpClient();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.code() == 404 || response.code() == 405) {
+                    throw new RuntimeException("The server does not support your Spind version");
+                } else if (response.code() != 200) {
+                    throw new RuntimeException(response.body().string());
+                }
+                unlockedSafe.passwords.clear();
+                unlockedSafe.passwords.addAll(passwords);
             }
-
-            unlockedSafe.passwords.clear();
-            unlockedSafe.passwords.addAll(passwords);
             return true;
-        } catch (JsonSyntaxException | IOException | InterruptedException | NoSuchAlgorithmException |
-                 NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+        } catch (JsonSyntaxException | IOException | NoSuchAlgorithmException | NoSuchPaddingException |
+                 InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace(System.err);
             throw new RuntimeException(e.getMessage());
         }
-    }
-
-    public static void copyToClipboard(@NotNull String text) {
-        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
     }
 
     private static byte @NotNull [] writeSafe(@NotNull String passwordHash, @NotNull List<Password> passwords) throws NoSuchPaddingException,

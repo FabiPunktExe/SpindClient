@@ -1,5 +1,9 @@
 package de.fabiexe.spind.client;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.webkit.JavascriptInterface;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,6 +17,11 @@ import java.util.List;
 
 public class SpindJsApi {
     private static final Gson gson = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
+    private final ClipboardManager clipboardManager;
+
+    public SpindJsApi(@NotNull ClipboardManager clipboardManager) {
+        this.clipboardManager = clipboardManager;
+    }
 
     @JavascriptInterface
     public String getServers() {
@@ -101,7 +110,7 @@ public class SpindJsApi {
     }
 
     @JavascriptInterface
-    public void copyToClipboard(String text) {
-        Spind.copyToClipboard(text);
+    public void copyToClipboard(@NotNull String label, @NotNull String text) {
+        clipboardManager.setPrimaryClip(ClipData.newPlainText(label, text));
     }
 }

@@ -2,6 +2,9 @@ package de.fabiexe.spind.client;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.util.List;
 
 public class SpindJsApi {
@@ -93,8 +96,8 @@ public class SpindJsApi {
 
     public static Object copyToClipboard(JsonArray params) {
         try {
-            String text = params.get(0).getAsString();
-            Spind.copyToClipboard(text);
+            String text = params.get(1).getAsString();
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
         } catch (JsonSyntaxException e) {
             e.printStackTrace(System.err);
         }

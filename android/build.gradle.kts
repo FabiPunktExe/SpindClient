@@ -32,6 +32,20 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packaging {
+        resources.excludes += "META-INF/kotlin-stdlib-common.kotlin_module"
+        resources.excludes += "META-INF/kotlin-stdlib-jdk7.kotlin_module"
+        resources.excludes += "META-INF/kotlin-stdlib-jdk8.kotlin_module"
+        resources.excludes += "META-INF/kotlin-stdlib.kotlin_module"
+        resources.excludes += "kotlin/annotation/annotation.kotlin_builtins"
+        resources.excludes += "kotlin/collections/collections.kotlin_builtins"
+        resources.excludes += "kotlin/coroutines/coroutines.kotlin_builtins"
+        resources.excludes += "kotlin/internal/internal.kotlin_builtins"
+        resources.excludes += "kotlin/kotlin.kotlin_builtins"
+        resources.excludes += "kotlin/ranges/ranges.kotlin_builtins"
+        resources.excludes += "kotlin/reflect/reflect.kotlin_builtins"
+    }
 }
 
 repositories {
@@ -48,14 +62,5 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation(platform("androidx.compose:compose-bom:2025.06.01"))
     implementation("androidx.compose.ui:ui:1.8.3")
-    //implementation(libs.androidx.ui.graphics)
-    //implementation(libs.androidx.ui.tooling.preview)
-    //implementation(libs.androidx.material3)
-    //testImplementation(libs.junit)
-    //androidTestImplementation(libs.androidx.junit)
-    //androidTestImplementation(libs.androidx.espresso.core)
-    //androidTestImplementation(platform(libs.androidx.compose.bom))
-    //androidTestImplementation(libs.androidx.ui.test.junit4)
-    //debugImplementation(libs.androidx.ui.tooling)
-    //debugImplementation(libs.androidx.ui.test.manifest)
+    runtimeOnly("com.squareup.okhttp3:okhttp:4.12.0")
 }
