@@ -10,10 +10,36 @@ import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.stream.Stream;
 import net.notjustanna.webview.WebviewStandalone;
+import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
+        String developmentServer;
+        Options options = new Options();
+        options.addOption(Option.builder()
+                .option("h")
+                .longOpt("help")
+                .desc("Show help").build());
+        options.addOption(Option.builder()
+                .option("d")
+                .longOpt("development-server")
+                .hasArg()
+                .argName("url")
+                .desc("The development server's url")
+                .build());
+        try {
+            CommandLine commandLine = new DefaultParser().parse(options, args);
+            if (commandLine.hasOption("help")) {
+                new HelpFormatter().printHelp("spind [OPTIONS]", options);
+                return;
+            }
+            developmentServer = commandLine.getOptionValue("development-server");
+        } catch (ParseException | NumberFormatException ignored) {
+            new HelpFormatter().printHelp("[OPTIONS]", options);
+            return;
+        }
+
         // Create temp dir
         Path tempDir = Files.createTempDirectory("spind");
         Thread shutdownHook = new Thread(() -> {
@@ -37,35 +63,37 @@ public class Main {
                 .start()
                 .waitFor();
 
-        // Read HTML, CSS, and JS files
         StringBuilder html = new StringBuilder();
-        try (Stream<Path> paths = Files.walk(tempDir.resolve("dist"))) {
-            paths.filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".html") || path.toString().endsWith(".css"))
-                    .forEach(path -> {
-                        try {
-                            String content = Files.readString(path);
-                            if (path.getFileName().toString().endsWith(".html")) {
-                                html.append(content).append("\n");
-                            } else if (path.getFileName().toString().endsWith(".css")) {
-                                html.append("<style>\n").append(content).append("\n</style>\n");
+        if (developmentServer == null) {
+            // Read HTML, CSS, and JS files
+            try (Stream<Path> paths = Files.walk(tempDir.resolve("dist"))) {
+                paths.filter(Files::isRegularFile)
+                        .filter(path -> path.toString().endsWith(".html") || path.toString().endsWith(".css"))
+                        .forEach(path -> {
+                            try {
+                                String content = Files.readString(path);
+                                if (path.getFileName().toString().endsWith(".html")) {
+                                    html.append(content).append("\n");
+                                } else if (path.getFileName().toString().endsWith(".css")) {
+                                    html.append("<style>\n").append(content).append("\n</style>\n");
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace(System.err);
                             }
-                        } catch (IOException e) {
-                            e.printStackTrace(System.err);
-                        }
-                    });
-        }
-        try (Stream<Path> paths = Files.walk(tempDir.resolve("dist"))) {
-            paths.filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".js"))
-                    .forEach(path -> {
-                        try {
-                            String content = Files.readString(path);
-                            html.append("<script>\n").append(content).append("\n</script>\n");
-                        } catch (IOException e) {
-                            e.printStackTrace(System.err);
-                        }
-                    });
+                        });
+            }
+            try (Stream<Path> paths = Files.walk(tempDir.resolve("dist"))) {
+                paths.filter(Files::isRegularFile)
+                        .filter(path -> path.toString().endsWith(".js"))
+                        .forEach(path -> {
+                            try {
+                                String content = Files.readString(path);
+                                html.append("<script>\n").append(content).append("\n</script>\n");
+                            } catch (IOException e) {
+                                e.printStackTrace(System.err);
+                            }
+                        });
+            }
         }
 
         // Delete temp dir
@@ -87,7 +115,11 @@ public class Main {
         webview.setTitle("Spind");
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         webview.setSize(screenSize.width / 2, screenSize.height / 2);
-        webview.setHtml(html.toString());
+        if (developmentServer == null) {
+            webview.setHtml(html.toString());
+        } else {
+            webview.navigate(developmentServer);
+        }
         webview.run();
         webview.close();
     }
