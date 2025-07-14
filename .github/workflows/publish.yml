@@ -69,4 +69,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mv android/build/outputs/apk/release/android-release-unsigned.apk android/build/outputs/apk/release/SpindAndroid.apk
-          gh release upload ${{ github.ref_name }} android/build/libs/SpindAndroid.jar
+          gh release upload ${{ github.ref_name }} android/build/outputs/apk/release/SpindAndroid.apk
