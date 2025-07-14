@@ -6,6 +6,7 @@ export type Server = {
 
 export type Password = {
     name: string
+    username?: string
     email?: string
     phone?: string
     password: string

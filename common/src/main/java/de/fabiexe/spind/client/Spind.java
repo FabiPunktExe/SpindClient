@@ -220,14 +220,42 @@ public class Spind {
 
         ByteBuffer versionBuffer = ByteBuffer.wrap(bytes, 0, 4);
         int version = versionBuffer.getInt();
-        if (version != 1) {
-            if (SAFE_VERSION < version) {
-                throw new IllegalArgumentException("Your Spind version is too old to unlock this safe, please update Spind");
-            } else {
-                throw new IllegalArgumentException("Your Spind version is too new to unlock this safe, please downgrade Spind");
-            }
+        if (version == 1) {
+            return readSafeV1(passwordHash, bytes);
+        } else if (version == 2) {
+            return readSafeV2(passwordHash, bytes);
+        } else if (SAFE_VERSION < version) {
+            throw new IllegalArgumentException("Your Spind version is too old to unlock this safe, please update Spind");
+        } else {
+            throw new IllegalArgumentException("Your Spind version is too new to unlock this safe, please downgrade Spind");
+        }
+    }
+
+    private static @Nullable List<Password> readSafeV1(@NotNull String passwordHash, byte @NotNull [] bytes) throws NoSuchPaddingException,
+            NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        byte[] passwordsBytes = new byte[bytes.length - 4];
+        System.arraycopy(bytes, 4, passwordsBytes, 0, passwordsBytes.length);
+        byte[] key = new byte[32];
+        System.arraycopy(passwordHash.getBytes(), 0, key, 0, key.length);
+        SecretKey secret = new SecretKeySpec(key, "AES");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, secret);
+        passwordsBytes = cipher.doFinal(passwordsBytes);
+
+        List<Password.V1> v1 = gson.fromJson(new String(passwordsBytes), new TypeToken<List<Password.V1>>() {}.getType());
+        if (v1 == null) {
+            return null;
         }
 
+        List<Password> v2 = new ArrayList<>();
+        for (Password.V1 password : v1) {
+            v2.add(new Password(password.getName(), null, password.getPhone(), null, password.getPassword()));
+        }
+        return v2;
+    }
+
+    private static @Nullable List<Password> readSafeV2(@NotNull String passwordHash, byte @NotNull [] bytes) throws NoSuchPaddingException,
+            NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         byte[] passwordsBytes = new byte[bytes.length - 4];
         System.arraycopy(bytes, 4, passwordsBytes, 0, passwordsBytes.length);
         byte[] key = new byte[32];

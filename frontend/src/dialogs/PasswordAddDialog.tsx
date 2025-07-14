@@ -14,9 +14,10 @@ export default function PasswordAddDialog({opened, close, addPassword}: {
         event.preventDefault()
         const data = new FormData(event.currentTarget)
         const name = data.get("name") as string
+        const username = data.get("username") as string || undefined
         const email = data.get("email") as string || undefined
         const phone = data.get("phone") as string || undefined
-        addPassword({name, email, phone, password}).then(() => {
+        addPassword({name, username, email, phone, password}).then(() => {
             setPassword("")
             close()
         })
@@ -42,6 +43,10 @@ export default function PasswordAddDialog({opened, close, addPassword}: {
                        autoComplete="off"
                        autoCorrect="off"
                        className="mt-1.5!"/>
+            <TextField name="username"
+                       label="Associated username"
+                       autoComplete="off"
+                       autoCorrect="off"/>
             <TextField name="email"
                        label="Associated email address"
                        autoComplete="off"

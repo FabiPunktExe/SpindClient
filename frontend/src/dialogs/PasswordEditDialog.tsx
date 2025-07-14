@@ -16,6 +16,7 @@ export default function PasswordEditDialog({opened, close, passwords, setPasswor
         event.preventDefault()
         const data = new FormData(event.currentTarget)
         const name = data.get("name") as string
+            const username = data.get("username") as string | undefined
         const email = data.get("email") as string || undefined
         const phone = data.get("phone") as string || undefined
 
@@ -24,7 +25,7 @@ export default function PasswordEditDialog({opened, close, passwords, setPasswor
             return
         }
         const newPasswords = [...passwords]
-        newPasswords[index] = {name, email, phone, password: passwordValue || ""}
+        newPasswords[index] = {name, username, email, phone, password: passwordValue || ""}
         setPasswords(newPasswords).then(close)
     }
 
@@ -49,6 +50,11 @@ export default function PasswordEditDialog({opened, close, passwords, setPasswor
                        autoComplete="off"
                        autoCorrect="off"
                        className="mt-1.5!"/>
+            <TextField name="username"
+                       label="Associated sername"
+                       defaultValue={password?.username}
+                       autoComplete="off"
+                       autoCorrect="off"/>
             <TextField name="email"
                        label="Associated email address"
                        defaultValue={password?.email}

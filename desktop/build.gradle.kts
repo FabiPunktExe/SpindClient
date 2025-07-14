@@ -66,7 +66,7 @@ tasks {
     }
 
     named<JavaExec>("run") {
-        args = listOf("--development-server", "http://localhost:5137")
+        args = listOf("--development-server", "http://localhost:5173")
     }
 }
 
