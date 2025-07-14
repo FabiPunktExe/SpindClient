@@ -51,7 +51,7 @@ export default function PasswordEditDialog({opened, close, passwords, setPasswor
                        autoCorrect="off"
                        className="mt-1.5!"/>
             <TextField name="username"
-                       label="Associated sername"
+                       label="Associated username"
                        defaultValue={password?.username}
                        autoComplete="off"
                        autoCorrect="off"/>
