@@ -15,7 +15,6 @@ dependencies {
     implementation("net.notjustanna.webview:webview_java:1.5.0+wv0.12.0-nightly.1")
     implementation("net.notjustanna.webview:webview_java-all-natives:1.5.0+wv0.12.0-nightly.1")
     implementation("net.notjustanna.webview:webview_java-interop:1.5.0+wv0.12.0-nightly.1")
-    implementation("commons-cli:commons-cli:1.9.0")
     runtimeOnly("com.squareup.okhttp3:okhttp:5.1.0")
 }
 
@@ -63,10 +62,6 @@ tasks {
         } else {
             throw GradleException("Unsupported OS: $os")
         }
-    }
-
-    named<JavaExec>("run") {
-        args = listOf("--development-server", "http://localhost:5173")
     }
 }
 

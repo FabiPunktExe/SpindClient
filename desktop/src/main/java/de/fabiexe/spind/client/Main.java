@@ -10,35 +10,11 @@ import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.stream.Stream;
 import net.notjustanna.webview.WebviewStandalone;
-import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
-        String developmentServer;
-        Options options = new Options();
-        options.addOption(Option.builder()
-                .option("h")
-                .longOpt("help")
-                .desc("Show help").build());
-        options.addOption(Option.builder()
-                .option("d")
-                .longOpt("development-server")
-                .hasArg()
-                .argName("url")
-                .desc("The development server's url")
-                .build());
-        try {
-            CommandLine commandLine = new DefaultParser().parse(options, args);
-            if (commandLine.hasOption("help")) {
-                new HelpFormatter().printHelp("spind [OPTIONS]", options);
-                return;
-            }
-            developmentServer = commandLine.getOptionValue("development-server");
-        } catch (ParseException | NumberFormatException ignored) {
-            new HelpFormatter().printHelp("[OPTIONS]", options);
-            return;
-        }
+        String developmentServer = System.getenv("SPIND_DEVELOPMENT_SERVER");
 
         // Create temp dir
         Path tempDir = Files.createTempDirectory("spind");
