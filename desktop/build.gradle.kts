@@ -52,14 +52,14 @@ tasks {
         workingDir = layout.buildDirectory.get().asFile
         val os = System.getProperty("os.name").lowercase()
         if (os.contains("win")) {
-            commandLine("jpackage", "--main-jar", "SpindDesktop.jar", "--name", "Spind", "--app-version",
-                version, "--vendor", "Fabi.exe", "--type", "msi", "--win-menu", "--win-per-user-install")
+            commandLine("jpackage", "--input", "libs", "--main-jar", "SpindDesktop.jar", "--name", "Spind",
+                "--app-version", version, "--vendor", "Fabi.exe", "--type", "msi", "--win-menu", "--win-per-user-install")
         } else if (os.contains("nix") || os.contains("nux")) {
-            commandLine("jpackage", "--main-jar", "SpindDesktop.jar", "--name", "Spind", "--app-version",
-                version, "--vendor", "Fabi.exe", "--type", "deb")
+            commandLine("jpackage", "--input", "libs", "--main-jar", "SpindDesktop.jar", "--name", "Spind",
+                "--app-version", version, "--vendor", "Fabi.exe", "--type", "deb")
         } else if (os.contains("mac")) {
-            commandLine("jpackage", "--main-jar", "SpindDesktop.jar", "--name", "Spind", "--app-version",
-                version, "--vendor", "Fabi.exe", "--type", "dmg")
+            commandLine("jpackage", "--input", "libs", "--main-jar", "SpindDesktop.jar", "--name", "Spind",
+                "--app-version", version, "--vendor", "Fabi.exe", "--type", "dmg")
         } else {
             throw GradleException("Unsupported OS: $os")
         }
