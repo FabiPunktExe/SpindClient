@@ -19,13 +19,13 @@ tasks {
     compileJava {
         doFirst {
             if (System.getProperty("os.name").lowercase().contains("win")) {
-                ProcessBuilder("cmd.exe", "/c", "npm install && npm run build && tar -cf frontend.tar dist")
+                ProcessBuilder("cmd.exe", "/c", "npm ci && npm run build && tar -cf frontend.tar dist")
                     .inheritIO()
                     .directory(file("../frontend"))
                     .start()
                     .waitFor()
             } else {
-                ProcessBuilder("/bin/bash", "-c", "npm install && npm run build && tar -cf frontend.tar dist")
+                ProcessBuilder("/bin/bash", "-c", "npm ci && npm run build && tar -cf frontend.tar dist")
                     .inheritIO()
                     .directory(file("../frontend"))
                     .start()
