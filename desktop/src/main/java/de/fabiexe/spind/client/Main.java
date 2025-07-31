@@ -15,32 +15,33 @@ import org.apache.commons.io.FileUtils;
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
         String developmentServer = System.getenv("SPIND_DEVELOPMENT_SERVER");
-
-        // Create temp dir
-        Path tempDir = Files.createTempDirectory("spind");
-        Thread shutdownHook = new Thread(() -> {
-            try {
-                FileUtils.deleteDirectory(tempDir.toFile());
-            } catch (IOException e) {
-                e.printStackTrace(System.err);
-            }
-        });
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
-
-        // Extract frontend
-        OutputStream out = Files.newOutputStream(tempDir.resolve("frontend.tar"), StandardOpenOption.CREATE_NEW);
-        InputStream in = Objects.requireNonNull(Main.class.getResourceAsStream("/frontend.tar"));
-        in.transferTo(out);
-        in.close();
-        out.close();
-        new ProcessBuilder("tar", "-xf", tempDir.resolve("frontend.tar").toString())
-                .directory(tempDir.toFile())
-                .inheritIO()
-                .start()
-                .waitFor();
+        String enableDevTools = System.getenv("SPIND_ENABLE_DEVTOOLS");
 
         StringBuilder html = new StringBuilder();
         if (developmentServer == null) {
+            // Create temp dir
+            Path tempDir = Files.createTempDirectory("spind");
+            Thread shutdownHook = new Thread(() -> {
+                try {
+                    FileUtils.deleteDirectory(tempDir.toFile());
+                } catch (IOException e) {
+                    e.printStackTrace(System.err);
+                }
+            });
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
+
+            // Extract frontend
+            OutputStream out = Files.newOutputStream(tempDir.resolve("frontend.tar"), StandardOpenOption.CREATE_NEW);
+            InputStream in = Objects.requireNonNull(Main.class.getResourceAsStream("/frontend.tar"));
+            in.transferTo(out);
+            in.close();
+            out.close();
+            new ProcessBuilder("tar", "-xf", tempDir.resolve("frontend.tar").toString())
+                    .directory(tempDir.toFile())
+                    .inheritIO()
+                    .start()
+                    .waitFor();
+
             // Read HTML, CSS, and JS files
             try (Stream<Path> paths = Files.walk(tempDir.resolve("dist"))) {
                 paths.filter(Files::isRegularFile)
@@ -70,14 +71,14 @@ public class Main {
                             }
                         });
             }
+
+            // Delete temp dir
+            FileUtils.deleteDirectory(tempDir.toFile());
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
         }
 
-        // Delete temp dir
-        FileUtils.deleteDirectory(tempDir.toFile());
-        Runtime.getRuntime().removeShutdownHook(shutdownHook);
-
         // Start Webview
-        WebviewStandalone webview = new WebviewStandalone(false);
+        WebviewStandalone webview = new WebviewStandalone("true".equals(enableDevTools));
         GsonWebviewInterop interop = new GsonWebviewInterop(webview.getWebview());
         interop.bind("spind$getServers", SpindJsApi::getServers);
         interop.bind("spind$setServers", SpindJsApi::setServers);
