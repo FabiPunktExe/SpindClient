@@ -91,7 +91,7 @@ public class Main {
         interop.bind("spind$copyToClipboard", SpindJsApi::copyToClipboard);
         webview.setTitle("Spind");
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        webview.setSize(screenSize.width / 2, screenSize.height / 2);
+        webview.setSize(screenSize.width * 2/3, screenSize.height * 2/3);
         if (developmentServer == null) {
             webview.setHtml(html.toString());
         } else {

@@ -1,18 +1,23 @@
 import {Password} from "../api.ts"
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography} from "@mui/material"
 import {Cancel, DeleteForever} from "@mui/icons-material"
+import {useState} from "react"
 
-export default function PasswordDeleteDialog({opened, close, passwords, setPasswords, password}: {
+export default function PasswordDeleteDialog({opened, close, password, submit}: {
     opened: boolean
     close: () => void
-    passwords: Password[]
-    setPasswords: (passwords: Password[]) => Promise<void>
     password?: Password
+    submit: () => Promise<void>
 }) {
-    function deletePassword() {
-        setPasswords(passwords.filter(p => p != password)).then(close)
-    }
+    const [loading, setLoading] = useState(false)
 
+    function onClick() {
+        setLoading(true)
+        submit().then(() => {
+            setLoading(false)
+            close()
+        })
+    }
     return <Dialog open={opened} onClose={close}>
         <DialogTitle>Delete password</DialogTitle>
         <DialogContent className="flex flex-col gap-2">
@@ -20,8 +25,16 @@ export default function PasswordDeleteDialog({opened, close, passwords, setPassw
             <Typography>This cannot be undone.</Typography>
         </DialogContent>
         <DialogActions>
-            <Button type="button" variant="outlined" startIcon={<Cancel/>} onClick={close}>Cancel</Button>
-            <Button type="button" variant="contained" startIcon={<DeleteForever/>} onClick={deletePassword}>Delete password</Button>
+            <Button type="button"
+                    variant="outlined"
+                    startIcon={<Cancel/>}
+                    loading={loading}
+                    onClick={close}>Cancel</Button>
+            <Button type="button"
+                    variant="contained"
+                    startIcon={<DeleteForever/>}
+                    loading={loading}
+                    onClick={onClick}>Delete password</Button>
         </DialogActions>
     </Dialog>
 }

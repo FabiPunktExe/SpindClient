@@ -21,7 +21,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class Spind {
-    private static final int SAFE_VERSION = 1;
+    private static final int SAFE_VERSION = 3;
     static Path directory;
     private static final Gson gson = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
     private static final List<UnlockedSafe> unlockedSafes = new ArrayList<>();
@@ -224,6 +224,8 @@ public class Spind {
             return readSafeV1(passwordHash, bytes);
         } else if (version == 2) {
             return readSafeV2(passwordHash, bytes);
+        } else if (version == 3) {
+            return readSafeV3(passwordHash, bytes);
         } else if (SAFE_VERSION < version) {
             throw new IllegalArgumentException("Your Spind version is too old to unlock this safe, please update Spind");
         } else {
@@ -247,14 +249,54 @@ public class Spind {
             return null;
         }
 
-        List<Password> v2 = new ArrayList<>();
+        List<Password> v3 = new ArrayList<>();
         for (Password.V1 password : v1) {
-            v2.add(new Password(password.getName(), null, password.getPhone(), null, password.getPassword()));
+            Map<String, String> fields = new HashMap<>();
+            if (password.getEmail() != null) {
+                fields.put("Email", password.getEmail());
+            }
+            if (password.getPhone() != null) {
+                fields.put("Phone", password.getPhone());
+            }
+            v3.add(new Password(password.getName(), password.getPassword(), fields));
         }
-        return v2;
+        return v3;
     }
 
     private static @Nullable List<Password> readSafeV2(@NotNull String passwordHash, byte @NotNull [] bytes) throws NoSuchPaddingException,
+            NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        byte[] passwordsBytes = new byte[bytes.length - 4];
+        System.arraycopy(bytes, 4, passwordsBytes, 0, passwordsBytes.length);
+        byte[] key = new byte[32];
+        System.arraycopy(passwordHash.getBytes(), 0, key, 0, key.length);
+        SecretKey secret = new SecretKeySpec(key, "AES");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, secret);
+        passwordsBytes = cipher.doFinal(passwordsBytes);
+
+        List<Password.V2> v2 = gson.fromJson(new String(passwordsBytes), new TypeToken<List<Password.V2>>() {}.getType());
+        if (v2 == null) {
+            return null;
+        }
+
+        List<Password> v3 = new ArrayList<>();
+        for (Password.V2 password : v2) {
+            Map<String, String> fields = new HashMap<>();
+            if (password.getUsername() != null) {
+                fields.put("Username", password.getUsername());
+            }
+            if (password.getEmail() != null) {
+                fields.put("Email", password.getEmail());
+            }
+            if (password.getPhone() != null) {
+                fields.put("Phone", password.getPhone());
+            }
+            v3.add(new Password(password.getName(), password.getPassword(), fields));
+        }
+        return v3;
+    }
+
+    private static @Nullable List<Password> readSafeV3(@NotNull String passwordHash, byte @NotNull [] bytes) throws NoSuchPaddingException,
             NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         byte[] passwordsBytes = new byte[bytes.length - 4];
         System.arraycopy(bytes, 4, passwordsBytes, 0, passwordsBytes.length);

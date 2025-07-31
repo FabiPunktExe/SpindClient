@@ -5,7 +5,7 @@ import {useState} from "react"
 import ServerEditDialog from "../dialogs/ServerEditDialog.tsx"
 import ServerRemoveDialog from "../dialogs/ServerRemoveDialog.tsx"
 
-export default function ServerMenu({servers, setServers, server, setServer, anchor, setAnchor}: {
+export default function ServerContextMenu({servers, setServers, server, setServer, anchor, setAnchor}: {
     servers: Server[]
     setServers: (servers: Server[]) => Promise<void>
     server?: Server

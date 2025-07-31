@@ -4,7 +4,7 @@ import {Box, Button, Paper, Tab, Tabs} from "@mui/material"
 import {Add} from "@mui/icons-material"
 import ServerAddDialog from "./dialogs/ServerAddDialog.tsx"
 import ServerPage from "./pages/ServerPage.tsx"
-import ServerMenu from "./components/ServerMenu.tsx"
+import ServerContextMenu from "./components/ServerContextMenu.tsx"
 
 export default function App() {
     const [servers, setServers] = useState<Server[]>([])
@@ -57,14 +57,14 @@ export default function App() {
         <ServerAddDialog opened={serverAddDialogOpen}
                          close={() => setServerAddDialogOpen(false)}
                          addServer={addServer}/>
-        <ServerMenu servers={servers}
-                    setServers={async servers => {
+        <ServerContextMenu servers={servers}
+                           setServers={async servers => {
                         await window.spind$setServers(servers)
                         setServers(servers)
                     }}
-                    server={menuServer}
-                    setServer={setMenuServer}
-                    anchor={menuAnchor}
-                    setAnchor={setMenuAnchor}/>
+                           server={menuServer}
+                           setServer={setMenuServer}
+                           anchor={menuAnchor}
+                           setAnchor={setMenuAnchor}/>
     </Box>
 }
