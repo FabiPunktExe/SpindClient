@@ -56,7 +56,7 @@ public class SpindJsApi {
         try {
             Server server = gson.fromJson(params.get(0), Server.class);
             String password = gson.fromJson(params.get(1), String.class);
-            if (server == null || password == null || password.isEmpty()) {
+            if (server == null || password == null) {
                 return "Invalid parameters";
             }
             Spind.setup(server, password);
@@ -82,7 +82,7 @@ public class SpindJsApi {
         try {
             Server server = gson.fromJson(params.get(0), Server.class);
             List<Password> passwords = gson.fromJson(params.get(1), new TypeToken<List<Password>>() {}.getType());
-            if (server == null || passwords == null || passwords.isEmpty()) {
+            if (server == null || passwords == null) {
                 return "Invalid parameters";
             }
             return Spind.setPasswords(server, passwords);
