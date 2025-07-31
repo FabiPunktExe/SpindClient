@@ -59,9 +59,9 @@ export default function App() {
                          addServer={addServer}/>
         <ServerContextMenu servers={servers}
                            setServers={async servers => {
-                        await window.spind$setServers(servers)
-                        setServers(servers)
-                    }}
+                               await window.spind$setServers(servers)
+                               setServers(servers)
+                           }}
                            server={menuServer}
                            setServer={setMenuServer}
                            anchor={menuAnchor}

@@ -1,6 +1,6 @@
 import {Server} from "../api.ts"
 import {useState} from "react"
-import {Button, CircularProgress, Paper, TextField, Typography} from "@mui/material"
+import {Button, Paper, TextField, Typography} from "@mui/material"
 import {LockOpen} from "@mui/icons-material"
 
 export default function UnlockPage({server, onSuccess, onSetupRequired, onFail}: {
@@ -35,8 +35,6 @@ export default function UnlockPage({server, onSuccess, onSetupRequired, onFail}:
                    label="Password"
                    autoComplete="off"
                    required={true}/>
-        <Button type="submit" startIcon={<LockOpen/>} variant="contained">Unlock</Button>
-        {loading && <CircularProgress/>}
-        {loading && <Typography>Unlocking your password safe...</Typography>}
+        <Button type="submit" startIcon={<LockOpen/>} variant="contained" loading={loading}>Unlock</Button>
     </Paper>
 }

@@ -28,7 +28,11 @@ const theme = createTheme({
         text: {
             primary: "#ffffff",
             secondary: "#bbbbbb",
-            disabled: "#888888"
+            disabled: "#bbbbbb"
+        },
+        action: {
+            disabled: "#bbbbbb",
+            disabledBackground: "#666666"
         }
     }
 })
