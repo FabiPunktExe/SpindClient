@@ -77,7 +77,7 @@ public class Main {
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
 
         // Start Webview
-        WebviewStandalone webview = new WebviewStandalone(true);
+        WebviewStandalone webview = new WebviewStandalone(false);
         GsonWebviewInterop interop = new GsonWebviewInterop(webview.getWebview());
         interop.bind("spind$getServers", SpindJsApi::getServers);
         interop.bind("spind$setServers", SpindJsApi::setServers);
