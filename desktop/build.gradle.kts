@@ -49,19 +49,24 @@ tasks {
         dependsOn(build)
         group = "build"
         workingDir = layout.buildDirectory.get().asFile
+        val args = mutableListOf(
+            "jpackage",
+            "--input", "libs",
+            "--main-jar", "SpindDesktop.jar",
+            "--name", "Spind",
+            "--app-version", version,
+            "--vendor", "Fabi.exe")
         val os = System.getProperty("os.name").lowercase()
         if (os.contains("win")) {
-            commandLine("jpackage", "--input", "libs", "--main-jar", "SpindDesktop.jar", "--name", "Spind",
-                "--app-version", version, "--vendor", "Fabi.exe", "--type", "msi", "--win-menu", "--win-per-user-install")
+            args.addAll(listOf("--type", "msi", "--win-menu", "--win-per-user-install"))
         } else if (os.contains("nix") || os.contains("nux")) {
-            commandLine("jpackage", "--input", "libs", "--main-jar", "SpindDesktop.jar", "--name", "Spind",
-                "--app-version", version, "--vendor", "Fabi.exe", "--type", "deb")
+            args.addAll(listOf("--type", "deb"))
         } else if (os.contains("mac")) {
-            commandLine("jpackage", "--input", "libs", "--main-jar", "SpindDesktop.jar", "--name", "Spind",
-                "--app-version", version, "--vendor", "Fabi.exe", "--type", "dmg")
+            args.addAll(listOf("--type", "dmg"))
         } else {
             throw GradleException("Unsupported OS: $os")
         }
+        commandLine(args)
     }
 }
 
