@@ -89,6 +89,7 @@ public class Main {
         interop.bind("spind$getPasswords", SpindJsApi::getPasswords);
         interop.bind("spind$setPasswords", SpindJsApi::setPasswords);
         interop.bind("spind$copyToClipboard", SpindJsApi::copyToClipboard);
+        interop.bind("spind$openInBrowser", SpindJsApi::openInBrowser);
         webview.setTitle("Spind");
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         webview.setSize(screenSize.width * 2/3, screenSize.height * 2/3);

@@ -11,13 +11,8 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
 import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,6 +20,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 public class Main extends ComponentActivity {
     private static final String TAG = "spind";
@@ -65,9 +62,7 @@ public class Main extends ComponentActivity {
             webView.getSettings().setAllowFileAccess(true);
             webView.setWebChromeClient(new SpindChromeClient());
             webView.setWebViewClient(new SpindWebViewClient());
-            webView.addJavascriptInterface(new SpindJsApi(getSystemService(ClipboardManager.class)), "spind");
-            //webView.loadData("<html><head><script type=\"module\">console.log('test');console.log(spind.test(['test']));</script></head><body onclick='console.log(\"test\")'>'%23' is the percent code for ‘#‘ </body></html>", null, null);
-            //webView.loadData(new String(Files.readAllBytes(tempDir.resolve("dist/index.html")), StandardCharsets.UTF_8), null, null);
+            webView.addJavascriptInterface(new SpindJsApi(this, getSystemService(ClipboardManager.class)), "spind");
             webView.loadUrl(tempDir.resolve("dist/index.html").toString());
             setContentView(webView);
         } catch (IOException | InterruptedException e) {

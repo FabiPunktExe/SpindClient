@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.webkit.JavascriptInterface;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,9 +18,11 @@ import java.util.List;
 
 public class SpindJsApi {
     private static final Gson gson = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
+    private final Context context;
     private final ClipboardManager clipboardManager;
 
-    public SpindJsApi(@NotNull ClipboardManager clipboardManager) {
+    public SpindJsApi(@NotNull Context context, @NotNull ClipboardManager clipboardManager) {
+        this.context = context;
         this.clipboardManager = clipboardManager;
     }
 
@@ -112,5 +115,10 @@ public class SpindJsApi {
     @JavascriptInterface
     public void copyToClipboard(@NotNull String label, @NotNull String text) {
         clipboardManager.setPrimaryClip(ClipData.newPlainText(label, text));
+    }
+
+    @JavascriptInterface
+    public void openInBrowser(@NotNull String url) {
+        context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
     }
 }

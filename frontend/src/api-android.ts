@@ -12,6 +12,7 @@ declare global {
             getPasswords(server: string): string
             setPasswords(server: string, passwords: string): string
             copyToClipboard(label: string, text: string): void
+            openInBrowser(url: string): void
         }
     }
 }
@@ -43,5 +44,8 @@ export function registerAndroidApi() {
     }
     window.spind$copyToClipboard = async (label: string, text: string) => {
         window.spind.copyToClipboard(label, text)
+    }
+    window.spind$openInBrowser = async (url: string) => {
+        window.spind.openInBrowser(url)
     }
 }

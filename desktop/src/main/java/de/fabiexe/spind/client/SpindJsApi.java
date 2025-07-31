@@ -2,9 +2,12 @@ package de.fabiexe.spind.client;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-
+import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class SpindJsApi {
@@ -101,6 +104,16 @@ public class SpindJsApi {
         } catch (JsonSyntaxException e) {
             e.printStackTrace(System.err);
         }
+        return null;
+    }
+
+    public static Object openInBrowser(JsonArray params) {
+        try {
+            String url = params.get(0).getAsString();
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new URI(url));
+            }
+        } catch (JsonSyntaxException | IOException | URISyntaxException ignored) {}
         return null;
     }
 }

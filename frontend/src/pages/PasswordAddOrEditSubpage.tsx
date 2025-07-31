@@ -1,9 +1,9 @@
 import {Password} from "../api.ts"
 import {ChangeEvent, ReactNode, useState} from "react"
 import {Autocomplete, Box, Button, IconButton, TextField, Typography} from "@mui/material"
-import {AddCircle, RemoveCircle, Shuffle} from "@mui/icons-material"
+import {AddCircle, Link, RemoveCircle, Shuffle} from "@mui/icons-material"
 
-const defaultFields = ["Website",  "Email", "Username", "Phone"]
+const defaultFields = ["Website", "Email", "Username", "Phone"]
 
 export default function PasswordAddOrEditSubpage({title, buttonLabel, buttonIcon, defaultPassword, submit}: {
     title: string
@@ -65,14 +65,19 @@ export default function PasswordAddOrEditSubpage({title, buttonLabel, buttonIcon
                 function onChange(event: ChangeEvent<HTMLInputElement>) {
                     setFields({...fields, [name]: event.target.value})
                 }
-                return <Box key={key} className="flex flex-row gap-2">
-                    <TextField key={key}
+
+                return <Box key={key} className="flex flex-row gap-2 items-center">
+                    <TextField className="grow"
                                label={name}
-                               type="text"
+                               type={name.toLowerCase() === "website" ? "url" : "text"}
                                autoComplete="off"
                                autoCorrect="off"
                                value={fields[name]}
                                onChange={onChange}/>
+                    {name.toLowerCase() === "website" &&
+                        <IconButton color="primary" onClick={() => window.spind$openInBrowser(fields[name])}>
+                            <Link/>
+                        </IconButton>}
                     <IconButton color="error" onClick={() => removeField(name)}><RemoveCircle/></IconButton>
                 </Box>
             })}
