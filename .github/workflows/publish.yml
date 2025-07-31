@@ -63,8 +63,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mv desktop/build/Spind-*.msi desktop/build/SpindInstaller.msi
-          gh release upload ${{ github.ref_name }} desktop/build/SpindInstaller.msi
+          mv desktop/build/Spind-*.msi desktop/build/SpindWindows.msi
+          gh release upload ${{ github.ref_name }} desktop/build/SpindWindows.msi
   publish-android:
     runs-on: ubuntu-latest
     environment: github-actions
