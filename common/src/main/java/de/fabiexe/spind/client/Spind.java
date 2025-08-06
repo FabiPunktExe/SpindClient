@@ -2,6 +2,7 @@ package de.fabiexe.spind.client;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -308,6 +309,10 @@ public class Spind {
         passwordsBytes = cipher.doFinal(passwordsBytes);
 
         return gson.fromJson(new String(passwordsBytes), new TypeToken<List<Password>>() {}.getType());
+    }
+
+    public static int twoFA(@NotNull String secret) {
+        return new GoogleAuthenticator().getTotpPassword(secret);
     }
 
     private static class UnlockedSafe {
