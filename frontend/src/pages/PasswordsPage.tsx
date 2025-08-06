@@ -102,40 +102,43 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
         return true
     })
 
-    return <Paper className="h-full grow p-2 flex flex-row gap-2">
-        <Box className="flex flex-col gap-2">
-            <Button variant="contained" startIcon={<Add/>} onClick={openPasswordAddSubpage}>Add Password</Button>
-            <TextField size="small"
-                       placeholder="Search"
-                       value={searchQuery}
-                       onChange={changePasswordFilter}/>
-            <Tabs value={selectedTab}
-                  onChange={(_, tab) => openPasswordSubpage(parseInt(tab))}
-                  orientation="vertical"
-                  variant="scrollable">
-                {filteredPasswords.map((password, key) => {
-                    function onContextMenu(event: MouseEvent<HTMLDivElement>) {
-                        setContextPassword(password)
-                        setContextMenuAnchor(event.currentTarget)
-                    }
-                    const label = <span className="w-full flex">{password.name}</span>
-                    return <Tab key={key} value={key} label={label} onContextMenu={onContextMenu}/>
-                })}
-            </Tabs>
-            {searchQuery && filteredPasswords.length == 0 && <Typography color="textSecondary" align="center">
-                No passwords match your search
-            </Typography>}
-        </Box>
+    return <>
+        <Paper className="sm:h-full grow p-2 flex max-sm:flex-col sm:flex-row gap-2">
+            <Box className="max-sm:max-h-80 flex flex-col gap-2">
+                <Button variant="contained" startIcon={<Add/>} onClick={openPasswordAddSubpage}>Add Password</Button>
+                <TextField size="small"
+                           placeholder="Search"
+                           value={searchQuery}
+                           onChange={changePasswordFilter}/>
+                <Tabs value={selectedTab}
+                      onChange={(_, tab) => openPasswordSubpage(parseInt(tab))}
+                      orientation="vertical"
+                      variant="scrollable">
+                    {filteredPasswords.map((password, key) => {
+                        function onContextMenu(event: MouseEvent<HTMLDivElement>) {
+                            setContextPassword(password)
+                            setContextMenuAnchor(event.currentTarget)
+                        }
+                        const label = <span className="w-full flex">{password.name}</span>
+                        return <Tab key={key} value={key} label={label} onContextMenu={onContextMenu}/>
+                    })}
+                </Tabs>
+                {searchQuery && filteredPasswords.length == 0 && <Typography color="textSecondary" align="center">
+                    No passwords match your search
+                </Typography>}
+            </Box>
+            <Box className="max-sm:hidden grow flex items-center justify-center">{subpage}</Box>
+        </Paper>
+        <Paper className="sm:hidden! grow p-2 flex items-center justify-center">{subpage}</Paper>
         <PasswordContextMenu contextPassword={contextPassword}
                              setContextPassword={setContextPassword}
                              anchor={contextMenuAnchor}
                              setAnchor={setContextMenuAnchor}
                              openPasswordEditSubpage={openPasswordEditSubpage}
                              openPasswordDeleteDialog={openPasswordDeleteDialog}/>
-        <Box className="grow flex items-center justify-center">{subpage}</Box>
         <PasswordDeleteDialog opened={deleteDialog !== undefined}
                               close={() => setDeleteDialog(undefined)}
                               password={deleteDialog}
                               submit={deletePassword}/>
-    </Paper>
+    </>
 }

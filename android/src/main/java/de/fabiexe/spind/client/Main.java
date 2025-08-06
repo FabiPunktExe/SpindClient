@@ -65,6 +65,7 @@ public class Main extends ComponentActivity {
             webView.addJavascriptInterface(new SpindJsApi(this, getSystemService(ClipboardManager.class)), "spind");
             webView.loadUrl(tempDir.resolve("dist/index.html").toString());
             setContentView(webView);
+            getActionBar().hide();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace(System.err);
         }

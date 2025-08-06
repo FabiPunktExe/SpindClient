@@ -1,6 +1,8 @@
 .gradle
 build/
 run/
+android/
+local.properties
 
 ### IntelliJ IDEA ###
 .idea/
