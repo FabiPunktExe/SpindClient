@@ -1,7 +1,8 @@
 .gradle
 build/
 run/
-android/
+android/release/
+android/spind-release-keystore.jks
 local.properties
 
 ### IntelliJ IDEA ###

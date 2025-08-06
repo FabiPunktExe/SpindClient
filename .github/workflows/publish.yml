@@ -88,9 +88,18 @@ jobs:
           cd ..
           chmod +x ./gradlew
           ./gradlew android:build
-      - name: Upload to GitHub releases
+      - name: Sign APK
+        uses: ilharp/sign-android-release@v2
+        id: sign_apk
+        with:
+          releaseDir: android/build/outputs/apk/release
+          signingKey: '${{ secrets.ANDROID_SIGNING_KEY }}'
+          keyAlias: '${{ secrets.ANDROID_KEY_ALIAS }}'
+          keyStorePassword: '${{ secrets.ANDROID_KEYSTORE_PASSWORD }}'
+          keyPassword: '${{ secrets.ANDROID_KEY_PASSWORD }}'
+      - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mv android/build/outputs/apk/release/android-release-unsigned.apk android/build/outputs/apk/release/SpindAndroid.apk
-          gh release upload ${{ github.ref_name }} android/build/outputs/apk/release/SpindAndroid.apk
+          mv ${{ steps.sign_apk.outputs.signedFile }} SpindAndroid.apk
+          gh release upload ${{ github.ref_name }} SpindAndroid.apk
