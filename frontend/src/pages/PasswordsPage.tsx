@@ -118,7 +118,8 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
                         setContextPassword(password)
                         setContextMenuAnchor(event.currentTarget)
                     }
-                    return <Tab key={key} value={key} label={password.name} onContextMenu={onContextMenu}/>
+                    const label = <span className="w-full flex">{password.name}</span>
+                    return <Tab key={key} value={key} label={label} onContextMenu={onContextMenu}/>
                 })}
             </Tabs>
             {searchQuery && filteredPasswords.length == 0 && <Typography color="textSecondary" align="center">

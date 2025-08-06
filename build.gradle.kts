@@ -1,5 +1,5 @@
 group = "de.fabiexe"
-version = "1.5.1"
+version = "1.5.2"
 
 subprojects {
     group = rootProject.group
