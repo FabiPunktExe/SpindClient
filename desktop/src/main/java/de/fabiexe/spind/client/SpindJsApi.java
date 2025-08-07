@@ -116,4 +116,11 @@ public class SpindJsApi {
         } catch (JsonSyntaxException | IOException | URISyntaxException ignored) {}
         return null;
     }
+
+    public static String generate2FACode(JsonArray params) {
+        try {
+            return String.valueOf(Spind.twoFA(params.get(0).getAsString()));
+        } catch (JsonSyntaxException ignored) {}
+        return null;
+    }
 }

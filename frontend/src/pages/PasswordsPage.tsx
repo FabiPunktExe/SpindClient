@@ -136,9 +136,10 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
                              setAnchor={setContextMenuAnchor}
                              openPasswordEditSubpage={openPasswordEditSubpage}
                              openPasswordDeleteDialog={openPasswordDeleteDialog}/>
+        <Box className="grow flex overflow-y-auto"><Box className="m-auto">{subpage}</Box></Box>
         <PasswordDeleteDialog opened={deleteDialog !== undefined}
                               close={() => setDeleteDialog(undefined)}
                               password={deleteDialog}
                               submit={deletePassword}/>
-    </>
+    </Paper>
 }

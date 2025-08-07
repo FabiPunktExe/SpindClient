@@ -22,5 +22,6 @@ declare global {
         spind$setPasswords(server: Server, passwords: Password[]): Promise<true | string>
         spind$copyToClipboard(label: string, text: string): Promise<void>
         spind$openInBrowser(url: string): Promise<void>
+        spind$generate2FACode(secret: string): Promise<null | string>
     }
 }

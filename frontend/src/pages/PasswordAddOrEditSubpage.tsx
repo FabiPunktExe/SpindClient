@@ -3,7 +3,7 @@ import {ChangeEvent, ReactNode, useState} from "react"
 import {Autocomplete, Box, Button, IconButton, TextField, Typography} from "@mui/material"
 import {AddCircle, Link, RemoveCircle, Shuffle} from "@mui/icons-material"
 
-const defaultFields = ["Website", "Email", "Username", "Phone"]
+const defaultFields = ["Website", "Email", "Username", "Phone", "2FA Secret"]
 
 export default function PasswordAddOrEditSubpage({title, buttonLabel, buttonIcon, defaultPassword, submit}: {
     title: string

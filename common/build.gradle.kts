@@ -11,6 +11,7 @@ dependencies {
     compileOnly("com.squareup.okhttp3:okhttp:5.1.0")
     implementation("com.google.code.gson:gson:2.13.1")
     implementation("commons-io:commons-io:2.20.0")
+    implementation("com.warrenstrange:googleauth:1.4.0")
 }
 
 sourceSets.main.get().resources.srcDirs(layout.buildDirectory.file("frontend"))
@@ -19,13 +20,13 @@ tasks {
     compileJava {
         doFirst {
             if (System.getProperty("os.name").lowercase().contains("win")) {
-                ProcessBuilder("cmd.exe", "/c", "npm ci && npm run build && tar -cf frontend.tar dist")
+                ProcessBuilder("cmd.exe", "/c", "npm i && npm run build && tar -cf frontend.tar dist")
                     .inheritIO()
                     .directory(file("../frontend"))
                     .start()
                     .waitFor()
             } else {
-                ProcessBuilder("/bin/bash", "-c", "npm ci && npm run build && tar -cf frontend.tar dist")
+                ProcessBuilder("/bin/bash", "-c", "npm i && npm run build && tar -cf frontend.tar dist")
                     .inheritIO()
                     .directory(file("../frontend"))
                     .start()
