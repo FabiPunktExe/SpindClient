@@ -103,7 +103,7 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
     })
 
     return <>
-        <Paper className="sm:h-full grow p-2 flex max-sm:flex-col sm:flex-row gap-2">
+        <Paper className="grow p-2 flex max-sm:flex-col sm:flex-row gap-2">
             <Box className="max-sm:max-h-80 flex flex-col gap-2">
                 <Button variant="contained" startIcon={<Add/>} onClick={openPasswordAddSubpage}>Add Password</Button>
                 <TextField size="small"
@@ -127,7 +127,7 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
                     No passwords match your search
                 </Typography>}
             </Box>
-            <Box className="max-sm:hidden grow flex items-center justify-center">{subpage}</Box>
+            <Box className="max-sm:hidden grow flex overflow-y-auto">{subpage}</Box>
         </Paper>
         <Paper className="sm:hidden! grow p-2 flex items-center justify-center">{subpage}</Paper>
         <PasswordContextMenu contextPassword={contextPassword}
@@ -136,10 +136,9 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
                              setAnchor={setContextMenuAnchor}
                              openPasswordEditSubpage={openPasswordEditSubpage}
                              openPasswordDeleteDialog={openPasswordDeleteDialog}/>
-        <Box className="grow flex overflow-y-auto"><Box className="m-auto">{subpage}</Box></Box>
         <PasswordDeleteDialog opened={deleteDialog !== undefined}
                               close={() => setDeleteDialog(undefined)}
                               password={deleteDialog}
                               submit={deletePassword}/>
-    </Paper>
+    </>
 }

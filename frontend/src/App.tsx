@@ -53,7 +53,7 @@ export default function App() {
         </Tabs>
     </>
 
-    return <Box className="w-full h-full flex flex-col">
+    return <Box className="max-sm:size-full sm:w-screen sm:h-screen flex flex-col">
         <IconButton onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     className="sm:hidden! left-1 top-1 w-fit">
             <Menu htmlColor="#ffffff"/>
@@ -69,7 +69,7 @@ export default function App() {
                          className="sm:hidden">
             <Box className="p-2 flex flex-col gap-2">{serverTabs}</Box>
         </SwipeableDrawer>
-        <Box className="max-sm:p-2 sm:p-4 flex max-sm:flex-col sm:flex-row max-sm:gap-2 sm:gap-4">
+        <Box className="h-full max-sm:p-2 sm:p-4 flex max-sm:flex-col sm:flex-row max-sm:gap-2 sm:gap-4">
             <Paper className="max-sm:hidden w-max h-full p-2 flex flex-col gap-2">{serverTabs}</Paper>
             {servers.map((server, key) => {
                 if (key === selectedTab) {
@@ -78,18 +78,18 @@ export default function App() {
                     return <></>
                 }
             })}
-            <ServerAddDialog opened={serverAddDialogOpen}
-                             close={() => setServerAddDialogOpen(false)}
-                             addServer={addServer}/>
-            <ServerContextMenu servers={servers}
-                               setServers={async servers => {
-                                   await window.spind$setServers(servers)
-                                   setServers(servers)
-                               }}
-                               server={menuServer}
-                               setServer={setMenuServer}
-                               anchor={menuAnchor}
-                               setAnchor={setMenuAnchor}/>
         </Box>
+        <ServerAddDialog opened={serverAddDialogOpen}
+                         close={() => setServerAddDialogOpen(false)}
+                         addServer={addServer}/>
+        <ServerContextMenu servers={servers}
+                           setServers={async servers => {
+                               await window.spind$setServers(servers)
+                               setServers(servers)
+                           }}
+                           server={menuServer}
+                           setServer={setMenuServer}
+                           anchor={menuAnchor}
+                           setAnchor={setMenuAnchor}/>
     </Box>
 }

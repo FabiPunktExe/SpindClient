@@ -38,7 +38,7 @@ export default function PasswordSubpage({password}: {password: Password}) {
         await window.spind$copyToClipboard(`Password for ${password.name}`, password.password)
     }
 
-    return <Box className="flex flex-col gap-2 items-center">
+    return <Box className="sm:size-full flex flex-col gap-2 items-center justify-center">
         <Typography variant="h5">Credentials for {password.name}</Typography>
         <Box className="flex flex-col gap-2">
             {Object.keys(password.fields).map((name, key) => {
