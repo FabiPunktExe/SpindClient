@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Locale;
 
 public class SpindJsApi {
     private static final Gson gson = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
@@ -119,8 +120,11 @@ public class SpindJsApi {
 
     public static String generate2FACode(JsonArray params) {
         try {
-            return String.valueOf(Spind.twoFA(params.get(0).getAsString()));
-        } catch (JsonSyntaxException ignored) {}
-        return null;
+            String secret = params.get(0).getAsString();
+            return String.format(Locale.getDefault(), "%06d", Spind.twoFA(secret));
+        } catch (RuntimeException e) {
+            e.printStackTrace(System.err);
+            return null;
+        }
     }
 }

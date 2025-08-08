@@ -11,10 +11,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.Strictness;
 import com.google.gson.reflect.TypeToken;
-
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
+import java.util.Locale;
+import org.jetbrains.annotations.NotNull;
 
 public class SpindJsApi {
     private static final Gson gson = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
@@ -34,7 +33,7 @@ public class SpindJsApi {
     @JavascriptInterface
     public boolean setServers(@NotNull String serversJson) {
         try {
-            Spind.setServers(gson.fromJson(serversJson, new TypeToken<>() {}));
+            Spind.setServers(gson.fromJson(serversJson, new TypeToken<List<Server>>() {}.getType()));
             return true;
         } catch (JsonSyntaxException e) {
             e.printStackTrace(System.err);
@@ -120,5 +119,15 @@ public class SpindJsApi {
     @JavascriptInterface
     public void openInBrowser(@NotNull String url) {
         context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+    }
+
+    @JavascriptInterface
+    public String generate2FACode(@NotNull String secret) {
+        try {
+            return String.format(Locale.getDefault(), "%06d", Spind.twoFA(secret));
+        } catch (RuntimeException e) {
+            e.printStackTrace(System.err);
+            return null;
+        }
     }
 }

@@ -13,6 +13,7 @@ declare global {
             setPasswords(server: string, passwords: string): string
             copyToClipboard(label: string, text: string): void
             openInBrowser(url: string): void
+            generate2FACode(secret: string): string | null
         }
     }
 }
@@ -47,5 +48,8 @@ export function registerAndroidApi() {
     }
     window.spind$openInBrowser = async (url: string) => {
         window.spind.openInBrowser(url)
+    }
+    window.spind$generate2FACode = async (secret: string) => {
+        return window.spind.generate2FACode(secret)
     }
 }
