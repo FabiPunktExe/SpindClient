@@ -1,7 +1,7 @@
 import {Password} from "../api.ts"
 import {ChangeEvent, ReactNode, useState} from "react"
 import {Autocomplete, Box, Button, IconButton, TextField, Typography} from "@mui/material"
-import {AddCircle, Link, QrCodeScanner, RemoveCircle, Shuffle} from "@mui/icons-material"
+import {AddCircle, Link, RemoveCircle, Shuffle} from "@mui/icons-material"
 
 const defaultFields = ["Website", "Email", "Username", "Phone", "2FA Secret"]
 
@@ -66,16 +66,6 @@ export default function PasswordAddOrEditSubpage({title, buttonLabel, buttonIcon
                     setFields({...fields, [name]: event.target.value})
                 }
 
-                async function scan2FASecret() {
-                    const result = await window.spind$scan2FACode()
-                    const url = new URL(result)
-                    if (url.protocol !== "otpauth:") return
-                    const secret = url.searchParams.get("secret")
-                    if (secret) {
-                        setFields({...fields, [name]: secret})
-                    }
-                }
-
                 return <Box key={key} className="flex flex-row gap-2 items-center">
                     <TextField className="grow"
                                label={name}
@@ -87,10 +77,6 @@ export default function PasswordAddOrEditSubpage({title, buttonLabel, buttonIcon
                     {name.toLowerCase() === "website" &&
                         <IconButton color="primary" onClick={() => window.spind$openInBrowser(fields[name])}>
                             <Link/>
-                        </IconButton>}
-                    {name.toLowerCase() === "2fa secret" &&
-                        <IconButton color="primary" onClick={scan2FASecret}>
-                            <QrCodeScanner/>
                         </IconButton>}
                     <IconButton color="error" onClick={() => removeField(name)}><RemoveCircle/></IconButton>
                 </Box>
