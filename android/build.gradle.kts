@@ -58,6 +58,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.2")
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation(platform("androidx.compose:compose-bom:2025.07.00"))
-    implementation("androidx.compose.ui:ui:1.8.3")
+    implementation("androidx.compose.ui:ui:1.9.0")
     runtimeOnly("com.squareup.okhttp3:okhttp:5.1.0")
 }
