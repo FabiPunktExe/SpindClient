@@ -33,7 +33,7 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
         if (result === true) {
             newPasswords.sort((a, b) => a.name.localeCompare(b.name))
             setPasswords(newPasswords)
-            setSelectedTab(newPasswords.indexOf(password))
+            setSelectedTab(calculateFilteredIndex(password, newPasswords))
             setSubpage(<PasswordSubpage password={password}/>)
         } else {
             onError(result)
@@ -46,7 +46,7 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
         if (result === true) {
             newPasswords.sort((a, b) => a.name.localeCompare(b.name))
             setPasswords(newPasswords)
-            setSelectedTab(newPasswords.indexOf(newPassword))
+            setSelectedTab(calculateFilteredIndex(newPassword, newPasswords))
             setSubpage(<PasswordSubpage password={newPassword}/>)
         } else {
             onError(result)
@@ -65,9 +65,10 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
         }
     }
 
-    function openPasswordSubpage(tab: number) {
-        setSelectedTab(tab)
-        setSubpage(<PasswordSubpage password={passwords[tab]}/>)
+    function openPasswordSubpage(password: Password) {
+        const filteredIndex = filteredPasswords.indexOf(password)
+        setSelectedTab(filteredIndex)
+        setSubpage(<PasswordSubpage password={password}/>)
     }
 
     function openPasswordAddSubpage() {
@@ -102,6 +103,20 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
         return true
     })
 
+    function calculateFilteredIndex(password: Password, passwordList: Password[]): number {
+        const filtered = passwordList.filter((p: Password) => {
+            const name = p.name.toLowerCase()
+            const parts = searchQuery.split(" ")
+            for (const part of parts) {
+                if (!name.includes(part.toLowerCase())) {
+                    return false
+                }
+            }
+            return true
+        })
+        return filtered.indexOf(password)
+    }
+
     return <>
         <Paper className="grow p-2 flex max-sm:flex-col sm:flex-row gap-2">
             <Box className="max-sm:max-h-80 flex flex-col gap-2">
@@ -111,7 +126,7 @@ export default function PasswordsPage({server, onError}: {server: Server, onErro
                            value={searchQuery}
                            onChange={changePasswordFilter}/>
                 <Tabs value={selectedTab}
-                      onChange={(_, tab) => openPasswordSubpage(parseInt(tab))}
+                      onChange={(_, tab) => openPasswordSubpage(filteredPasswords[parseInt(tab)])}
                       orientation="vertical"
                       variant="scrollable">
                     {filteredPasswords.map((password, key) => {
