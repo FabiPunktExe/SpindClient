@@ -23,7 +23,7 @@ sourceSets.main.get().resources.srcDirs(layout.buildDirectory.file("frontend"))
 tasks {
     compileJava {
         options.encoding = "UTF-8"
-        options.release = 21
+        options.release = 17
     }
 
     jar {

@@ -12,11 +12,21 @@ dependencies {
     implementation("com.google.code.gson:gson:2.13.1")
     implementation("commons-io:commons-io:2.20.0")
     implementation("com.warrenstrange:googleauth:1.5.0")
+    
+    // Test dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
+    testImplementation("org.mockito:mockito-core:5.15.2")
+    testImplementation("com.squareup.okhttp3:okhttp:5.1.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 sourceSets.main.get().resources.srcDirs(layout.buildDirectory.file("frontend"))
 
 tasks {
+    test {
+        useJUnitPlatform()
+    }
+    
     compileJava {
         doFirst {
             if (System.getProperty("os.name").lowercase().contains("win")) {
