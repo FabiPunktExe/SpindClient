@@ -10,4 +10,5 @@ rootProject.name = "client"
 
 include("common")
 include("desktop")
-include("android")
+// Temporarily exclude android for analysis
+// include("android")
