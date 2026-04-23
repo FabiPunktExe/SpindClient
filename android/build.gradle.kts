@@ -51,7 +51,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.google.code.gson:gson:2.13.1")
+    implementation("com.google.code.gson:gson:2.14.0")
     implementation("commons-io:commons-io:2.20.0")
     implementation(project(":common"))
     implementation("androidx.core:core-ktx:1.16.0")

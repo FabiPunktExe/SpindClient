@@ -9,7 +9,7 @@ repositories {
 dependencies {
     compileOnly("org.jetbrains:annotations:26.0.2")
     compileOnly("com.squareup.okhttp3:okhttp:5.1.0")
-    implementation("com.google.code.gson:gson:2.13.1")
+    implementation("com.google.code.gson:gson:2.14.0")
     implementation("commons-io:commons-io:2.20.0")
     implementation("com.warrenstrange:googleauth:1.5.0")
 }
